@@ -261,4 +261,13 @@ public class ASMapView extends MapView {
                 strokeWidth(1).zIndex(9999);
         polygon = getMap().addPolygon(polygonOptions);
     }
+
+    /**
+     * 设置地图图层
+     *
+     * @param mapType
+     */
+    public void setMapType(int mapType) {
+        getMap().setMapType(mapType);
+    }
 }

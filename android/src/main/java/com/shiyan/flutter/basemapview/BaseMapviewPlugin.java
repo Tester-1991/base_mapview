@@ -7,6 +7,7 @@ import com.amap.api.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import io.flutter.app.FlutterActivity;
 import io.flutter.plugin.common.MethodCall;
@@ -27,6 +28,8 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
     private ASMapView mapView;
 
+    Map<String, Object> mapViewOptions;
+
     public BaseMapviewPlugin(FlutterActivity activity, MethodChannel channel) {
         this.root = activity;
     }
@@ -43,18 +46,35 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
     @Override
     public void onMethodCall(MethodCall call, Result result) {
+        //获取参数
+        Map<String, Object> args = (Map<String, Object>) call.arguments;
+
+
+        if (args != null && args.containsKey("mapView")) {
+            mapViewOptions = (Map<String, Object>) args.get("mapView");
+        }
+
         //显示地图
         if (call.method.equals("showMapView")) {
 
-            mapView = new ASMapView(root);
+            root.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mapView = new ASMapView(root);
 
-            mapView.onCreate(new Bundle());
+                    mapView.onCreate(new Bundle());
 
-            mapView.onResume();
+                    mapView.onResume();
 
-            mapView.init();
+                    mapView.init();
 
-            root.addContentView(mapView, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 1200));
+                    int mapType = (int) mapViewOptions.get("mapType");
+
+                    mapView.setMapType(mapType);
+
+                    root.addContentView(mapView, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 1000));
+                }
+            });
 
         }
         //定位
@@ -124,7 +144,14 @@ public class BaseMapviewPlugin implements MethodCallHandler {
             mapView.addPointMarker(latlngList);
 
             mapView.drawPolygon(latlngList);
-        } else {
+        }
+        //切换地图图层
+        else if (call.method.equals("setMapType")) {
+            int mapType = (int) mapViewOptions.get("mapType");
+            mapView.setMapType(mapType);
+        }
+        //无消息
+        else {
             result.notImplemented();
         }
     }
