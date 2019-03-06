@@ -25,6 +25,8 @@ class _AMapViewState extends State<AMapView> {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Container(
+      height: 400.0,
+    );
   }
 }
