@@ -16,6 +16,8 @@ A new Flutter MapView plugin.
 
 5.绘制圆形，绘制线，绘制多边形
 
+6.切换图层
+
 
 
 
