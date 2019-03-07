@@ -4,7 +4,7 @@ A new Flutter MapView plugin.
 
 高德地图插件
 
-!(https://github.com/android-shiyan/base_mapview/blob/master/image/device-2019-03-07-152243.png?raw=true)
+![image](https://github.com/android-shiyan/base_mapview/blob/master/image/device-2019-03-07-152243.png?raw=true)
 
 ## 特性
 
