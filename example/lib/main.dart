@@ -8,11 +8,8 @@ class MyApp extends StatefulWidget {
   _MyAppState createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
-  @override
-  void initState() {
-    super.initState();
-  }
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
+
 
   @override
   Widget build(BuildContext context) {

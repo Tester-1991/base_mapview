@@ -101,6 +101,9 @@ public class ASMapView extends MapView {
         //控制比例尺控件是否显示
         mUiSettings.setScaleControlsEnabled(false);
 
+        //显示默认的定位按钮
+        mUiSettings.setMyLocationButtonEnabled(true);
+
         //定位监听
         getMap().setOnMyLocationChangeListener(new AMap.OnMyLocationChangeListener() {
             @Override

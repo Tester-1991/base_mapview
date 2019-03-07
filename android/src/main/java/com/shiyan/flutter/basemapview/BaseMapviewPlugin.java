@@ -1,5 +1,7 @@
 package com.shiyan.flutter.basemapview;
 
+import android.app.Activity;
+import android.app.Application;
 import android.os.Bundle;
 import android.widget.FrameLayout;
 
@@ -23,15 +25,63 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
  */
 public class BaseMapviewPlugin implements MethodCallHandler {
 
-
+    //当前Activity环境
     private FlutterActivity root;
 
+    //当前地图控件
     private ASMapView mapView;
 
+    //地图参数配置
     Map<String, Object> mapViewOptions;
 
+    //构造函数
     public BaseMapviewPlugin(FlutterActivity activity, MethodChannel channel) {
         this.root = activity;
+        //处理生命周期
+        this.root.getApplication().registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
+            @Override
+            public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+            }
+
+            @Override
+            public void onActivityStarted(Activity activity) {
+
+            }
+
+            @Override
+            public void onActivityResumed(Activity activity) {
+                if (activity != root) return;
+                if (mapView != null) {
+                    mapView.onResume();
+                }
+            }
+
+            @Override
+            public void onActivityPaused(Activity activity) {
+                if (activity != root) return;
+                if (mapView != null) {
+                    mapView.onPause();
+                }
+            }
+
+            @Override
+            public void onActivityStopped(Activity activity) {
+
+            }
+
+            @Override
+            public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+
+            }
+
+            @Override
+            public void onActivityDestroyed(Activity activity) {
+                if (activity != root) return;
+                if (mapView != null) {
+                    mapView.onDestroy();
+                }
+            }
+        });
     }
 
     /**
@@ -44,6 +94,12 @@ public class BaseMapviewPlugin implements MethodCallHandler {
         channel.setMethodCallHandler(new BaseMapviewPlugin((FlutterActivity) registrar.activity(), channel));
     }
 
+    /**
+     * 方法回调
+     *
+     * @param call
+     * @param result
+     */
     @Override
     public void onMethodCall(MethodCall call, Result result) {
         //获取参数
@@ -155,6 +211,5 @@ public class BaseMapviewPlugin implements MethodCallHandler {
             result.notImplemented();
         }
     }
-
 
 }

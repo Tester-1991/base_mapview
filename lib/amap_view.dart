@@ -31,14 +31,14 @@ class _AMapViewState extends State<AMapView> {
   void initState() {
     ///加载地图
     AMapView.channel.invokeMethod("showMapView", {"mapView": widget.toMap()});
+
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      child: Container(
-      ),
+      child: Container(),
       height: 250.0,
     );
   }
