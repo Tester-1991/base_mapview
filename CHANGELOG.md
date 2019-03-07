@@ -1,3 +1,10 @@
-## 0.0.1
+## [0.0.1] - 05-13-2018
 
-* TODO: Describe initial release.
+* android支持
+* 不需要添加任何支持即可显示地图，无需Activity和Controller
+* 3D地图的显示
+* 地图的定位
+* 添加marker,移除marker
+* 绘制圆形，绘制线，绘制多边形
+* 设置地图缩放层级，放大地图，缩放地图
+

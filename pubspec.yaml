@@ -1,8 +1,8 @@
 name: base_mapview
-description: A new Flutter MapView plugin.
+description: A new Flutter MapView plugin About Gordes Map.It implements the following functions:Android Support.Support for basic map options.Support for location change update.Support for full screen map.
 version: 0.0.1
-author:
-homepage:
+author: shiyan <shiyan1002450926@gmail.com>
+homepage: https://github.com/android-shiyan/base_mapview
 
 environment:
   sdk: ">=2.1.0 <3.0.0"

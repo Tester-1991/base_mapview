@@ -18,5 +18,4 @@ class LatLng {
   String toString() {
     return 'LatLng{latitude: $latitude, longitude: $longitude}';
   }
-
 }
