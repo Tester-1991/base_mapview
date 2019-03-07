@@ -1,3 +1,4 @@
+import 'package:base_mapview/latlng.dart';
 import 'package:flutter/material.dart';
 import 'package:base_mapview/amap_view.dart';
 
@@ -8,9 +9,7 @@ class MyApp extends StatefulWidget {
   _MyAppState createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
-
-
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -20,7 +19,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
           ),
           body: Column(
             children: <Widget>[
-              AMapView(),
+              AMapView(
+                mapType: MapType.satellite,
+                centerCoordinate: LatLng(43.99791, 125.397968),
+                zoomLevel: 10,
+              ),
               Wrap(
                 children: <Widget>[
                   RaisedButton(
@@ -102,6 +105,24 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
                     },
                     child: Text(
                       "正常图层",
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                  RaisedButton(
+                    onPressed: () {
+                      AMapView.channel.invokeMethod("zoomOut");
+                    },
+                    child: Text(
+                      "放大地图",
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                  RaisedButton(
+                    onPressed: () {
+                      AMapView.channel.invokeMethod("zoomIn");
+                    },
+                    child: Text(
+                      "缩小地图",
                       style: TextStyle(color: Colors.red),
                     ),
                   ),

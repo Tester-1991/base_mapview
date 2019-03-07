@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.AMapOptions;
@@ -25,6 +26,7 @@ import com.amap.api.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by shiyan on 2019/3/6
@@ -62,7 +64,7 @@ public class ASMapView extends MapView {
     /**
      * 初始化方法
      */
-    public void init() {
+    public void init(Map<String, Object> mapViewOptions) {
         MyLocationStyle myLocationStyle = new MyLocationStyle();
 
         //连续定位、视角不移动到地图中心点
@@ -102,7 +104,7 @@ public class ASMapView extends MapView {
         mUiSettings.setScaleControlsEnabled(false);
 
         //显示默认的定位按钮
-        mUiSettings.setMyLocationButtonEnabled(true);
+        mUiSettings.setMyLocationButtonEnabled(false);
 
         //定位监听
         getMap().setOnMyLocationChangeListener(new AMap.OnMyLocationChangeListener() {
@@ -112,6 +114,29 @@ public class ASMapView extends MapView {
                 latLng = new LatLng(location.getLatitude(), location.getLongitude());
             }
         });
+
+        if (mapViewOptions == null) return;
+
+        //设置地图模式
+        int mapType = (int) mapViewOptions.get("mapType");
+
+        setMapType(mapType);
+
+        //中心点设置
+        Map<String, Object> coordinateMap = (Map<String, Object>) mapViewOptions.get("centerCoordinate");
+
+        if (coordinateMap != null) {
+            animateCamera(new LatLng((double) coordinateMap.get("latitude"), (double) coordinateMap.get("longitude")));
+        }
+
+        //设置地图缩放级别
+        double zoomLevel = (double) mapViewOptions.get("zoomLevel");
+
+        getMap().moveCamera(CameraUpdateFactory.zoomTo((float) zoomLevel));
+
+
+        float zoom = getMap().getCameraPosition().zoom;
+
     }
 
     /**
@@ -272,5 +297,20 @@ public class ASMapView extends MapView {
      */
     public void setMapType(int mapType) {
         getMap().setMapType(mapType);
+
+    }
+
+    /**
+     * 放大地图级别
+     */
+    public void zoomOut() {
+        getMap().moveCamera(CameraUpdateFactory.zoomOut());
+    }
+
+    /**
+     * 缩小地图级别
+     */
+    public void zoomIn(){
+        getMap().moveCamera(CameraUpdateFactory.zoomIn());
     }
 }

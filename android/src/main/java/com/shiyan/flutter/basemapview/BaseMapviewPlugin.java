@@ -105,7 +105,7 @@ public class BaseMapviewPlugin implements MethodCallHandler {
         //获取参数
         Map<String, Object> args = (Map<String, Object>) call.arguments;
 
-
+        //获取地图参数配置信息
         if (args != null && args.containsKey("mapView")) {
             mapViewOptions = (Map<String, Object>) args.get("mapView");
         }
@@ -122,11 +122,7 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
                     mapView.onResume();
 
-                    mapView.init();
-
-                    int mapType = (int) mapViewOptions.get("mapType");
-
-                    mapView.setMapType(mapType);
+                    mapView.init(mapViewOptions);
 
                     root.addContentView(mapView, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 1000));
                 }
@@ -205,6 +201,14 @@ public class BaseMapviewPlugin implements MethodCallHandler {
         else if (call.method.equals("setMapType")) {
             int mapType = (int) mapViewOptions.get("mapType");
             mapView.setMapType(mapType);
+        }
+        //放大地图级别
+        else if (call.method.equals("zoomOut")) {
+            mapView.zoomOut();
+        }
+        //缩小地图级别
+        else if (call.method.equals("zoomIn")) {
+            mapView.zoomIn();
         }
         //无消息
         else {
