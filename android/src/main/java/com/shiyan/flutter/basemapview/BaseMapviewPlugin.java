@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
+import android.os.Handler;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
@@ -255,7 +256,12 @@ public class BaseMapviewPlugin implements MethodCallHandler {
                 new AcpListener() {
                     @Override
                     public void onGranted() {
-                        mapView.animateCamera(mapView.getLatLng());
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                mapView.animateCamera(mapView.getLatLng());
+                            }
+                        }, 2000);
                     }
 
                     @Override

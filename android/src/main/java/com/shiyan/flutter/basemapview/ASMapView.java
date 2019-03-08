@@ -5,7 +5,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
 import android.util.AttributeSet;
-import android.util.Log;
 
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.AMapOptions;
@@ -71,7 +70,7 @@ public class ASMapView extends MapView {
         myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_FOLLOW_NO_CENTER);
 
         //设置连续定位模式下的定位间隔，只在连续定位模式下生效，单次定位模式下不会生效。单位为毫秒。
-        myLocationStyle.interval(4000);
+        myLocationStyle.interval(1000);
 
         //自定义精度范围的圆形边框颜色
         myLocationStyle.strokeColor(Color.argb(0, 0, 0, 0));
@@ -133,9 +132,6 @@ public class ASMapView extends MapView {
         double zoomLevel = (double) mapViewOptions.get("zoomLevel");
 
         getMap().moveCamera(CameraUpdateFactory.zoomTo((float) zoomLevel));
-
-
-        float zoom = getMap().getCameraPosition().zoom;
 
     }
 
