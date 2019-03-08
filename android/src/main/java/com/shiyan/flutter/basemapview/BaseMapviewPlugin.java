@@ -1,11 +1,16 @@
 package com.shiyan.flutter.basemapview;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import com.amap.api.maps.model.LatLng;
+import com.mylhyl.acp.Acp;
+import com.mylhyl.acp.AcpListener;
+import com.mylhyl.acp.AcpOptions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +38,8 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
     //地图参数配置
     Map<String, Object> mapViewOptions;
+
+    private String[] maniFests = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
     //构造函数
     public BaseMapviewPlugin(FlutterActivity activity, MethodChannel channel) {
@@ -82,6 +89,27 @@ public class BaseMapviewPlugin implements MethodCallHandler {
                 }
             }
         });
+
+        requestPermission();
+    }
+
+    /**
+     * 获取权限(ACCESS_COARSE_LOCATION,WRITE_EXTERNAL_STORAGE)
+     */
+    private void requestPermission() {
+        Acp.getInstance(root).request(new AcpOptions.Builder()
+                        .setPermissions(maniFests)
+                        .build(),
+                new AcpListener() {
+                    @Override
+                    public void onGranted() {
+
+                    }
+
+                    @Override
+                    public void onDenied(List<String> permissions) {
+                    }
+                });
     }
 
     /**
@@ -92,6 +120,7 @@ public class BaseMapviewPlugin implements MethodCallHandler {
     public static void registerWith(Registrar registrar) {
         final MethodChannel channel = new MethodChannel(registrar.messenger(), "flutter_amap");
         channel.setMethodCallHandler(new BaseMapviewPlugin((FlutterActivity) registrar.activity(), channel));
+
     }
 
     /**
@@ -131,7 +160,7 @@ public class BaseMapviewPlugin implements MethodCallHandler {
         }
         //定位
         else if (call.method.equals("location")) {
-            mapView.animateCamera(mapView.getLatLng());
+            locationAction();
         }
         //添加marker
         else if (call.method.equals("addmarker")) {
@@ -214,6 +243,25 @@ public class BaseMapviewPlugin implements MethodCallHandler {
         else {
             result.notImplemented();
         }
+    }
+
+    /**
+     * 定位
+     */
+    private void locationAction() {
+        Acp.getInstance(root).request(new AcpOptions.Builder()
+                        .setPermissions(Manifest.permission.ACCESS_COARSE_LOCATION)
+                        .build(),
+                new AcpListener() {
+                    @Override
+                    public void onGranted() {
+                        mapView.animateCamera(mapView.getLatLng());
+                    }
+
+                    @Override
+                    public void onDenied(List<String> permissions) {
+                    }
+                });
     }
 
 }

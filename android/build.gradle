@@ -37,4 +37,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     //3D地图so及jar
     implementation 'com.amap.api:3dmap:latest.integration'
+
+    implementation 'com.mylhyl:acp:1.2.0'
+
 }
