@@ -181,44 +181,16 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
         //绘制线
         else if (call.method.equals("drawpolylin")) {
-            //116.30102,39.82588 116.302554,39.825847 116.300612,39.823853
-            List<LatLng> latlngList = new ArrayList<>();
 
-            LatLng latLng = new LatLng(39.82588, 116.30102);
+            drawPolylinAction();
 
-            latlngList.add(latLng);
-
-            LatLng latLng2 = new LatLng(39.825847, 116.302554);
-
-            latlngList.add(latLng2);
-
-            LatLng latLng3 = new LatLng(39.823853, 116.300612);
-
-            latlngList.add(latLng3);
-
-            mapView.drawPolylin(latlngList);
         }
 
         //绘制多边形
         else if (call.method.equals("drawPolygon")) {
-            //116.295385,39.823862  116.296299,39.823734 116.294776,39.823083
-            List<LatLng> latlngList = new ArrayList<>();
 
-            LatLng latLng = new LatLng(39.823862, 116.295385);
+            drawPolygonAction();
 
-            latlngList.add(latLng);
-
-            LatLng latLng2 = new LatLng(39.823734, 116.296299);
-
-            latlngList.add(latLng2);
-
-            LatLng latLng3 = new LatLng(39.823083, 116.294776);
-
-            latlngList.add(latLng3);
-
-            mapView.addPointMarker(latlngList);
-
-            mapView.drawPolygon(latlngList);
         }
 
         //切换地图图层
@@ -361,6 +333,45 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
         mapView.drawCircle(new LatLng((double) roundcenterMap.get("latitude"), (double) roundcenterMap.get("longitude")), (Double) mapViewOptions.get("radius"));
 
+    }
+
+    /**
+     * 绘制线
+     */
+    private void drawPolylinAction() {
+
+        List<LatLng> latlngList = new ArrayList<>();
+
+        List<Map<String, Object>> list = (List) mapViewOptions.get("polylinlist");
+
+        for (Map<String, Object> map : list) {
+
+            LatLng lantLng = new LatLng((double) map.get("latitude"), (double) map.get("longitude"));
+
+            latlngList.add(lantLng);
+        }
+
+        mapView.drawPolylin(latlngList);
+
+    }
+
+    /**
+     * 绘制多边形
+     */
+    private void drawPolygonAction() {
+
+        List<LatLng> latlngList = new ArrayList<>();
+
+        List<Map<String, Object>> list = (List) mapViewOptions.get("polygonlist");
+
+        for (Map<String, Object> map : list) {
+
+            LatLng lantLng = new LatLng((double) map.get("latitude"), (double) map.get("longitude"));
+
+            latlngList.add(lantLng);
+        }
+
+        mapView.drawPolygon(latlngList);
     }
 
 }

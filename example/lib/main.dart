@@ -18,6 +18,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     LatLng(39.823083, 116.294776).toMap()
   ];
 
+  List _polylinelist = [
+    LatLng(39.82588, 116.30102).toMap(),
+    LatLng(39.825847, 116.302554).toMap(),
+    LatLng(39.823853, 116.300612).toMap(),
+  ];
+
+  List _polygonlist = [
+    LatLng(39.823862, 116.295385).toMap(),
+    LatLng(39.823734, 116.296299).toMap(),
+    LatLng(39.823083, 116.294776).toMap(),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -72,7 +84,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         "drawcircle",
                         {
                           "mapView": {
-                            "roundcenter": LatLng(39.825262, 116.297241).toMap(),
+                            "roundcenter":
+                                LatLng(39.825262, 116.297241).toMap(),
                             "radius": 100.0,
                           }
                         },
@@ -85,7 +98,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   ),
                   RaisedButton(
                     onPressed: () {
-                      AMapView.channel.invokeMethod("drawpolylin");
+                      AMapView.channel.invokeMethod(
+                        "drawpolylin",
+                        {
+                          "mapView": {"polylinlist": _polylinelist}
+                        },
+                      );
                     },
                     child: Text(
                       "绘制线",
@@ -94,7 +112,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   ),
                   RaisedButton(
                     onPressed: () {
-                      AMapView.channel.invokeMethod("drawPolygon");
+                      AMapView.channel.invokeMethod(
+                        "drawPolygon",
+                        {
+                          "mapView": {"polygonlist": _polygonlist}
+                        },
+                      );
                     },
                     child: Text(
                       "绘制多边形",
