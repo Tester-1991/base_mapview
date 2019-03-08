@@ -1,10 +1,15 @@
 package com.shiyan.flutter.basemapview;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Application;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
@@ -17,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.flutter.app.FlutterActivity;
 import io.flutter.plugin.common.MethodCall;
@@ -42,6 +48,42 @@ public class BaseMapviewPlugin implements MethodCallHandler {
     Map<String, Object> mapViewOptions;
 
     private String[] maniFests = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
+    private static MethodChannel channel;
+
+    private Map<String, ASMapView> map = new ConcurrentHashMap<>();
+
+    private String id;
+
+    /**
+     * 创建view
+     *
+     * @param id
+     * @return
+     */
+    private ASMapView createView(String id) {
+
+        ASMapView view = new ASMapView(root);
+
+        view.setKey(id);
+
+        map.put(id, view);
+
+        return view;
+    }
+
+    /**
+     * 获取view
+     *
+     * @param id
+     * @return
+     */
+    private ASMapView getView(String id) {
+
+        return map.get(id);
+
+    }
+
 
     //构造函数
     public BaseMapviewPlugin(FlutterActivity activity) {
@@ -121,7 +163,7 @@ public class BaseMapviewPlugin implements MethodCallHandler {
      */
     public static void registerWith(Registrar registrar) {
 
-        final MethodChannel channel = new MethodChannel(registrar.messenger(), "flutter_amap");
+        channel = new MethodChannel(registrar.messenger(), "flutter_amap");
 
         channel.setMethodCallHandler(new BaseMapviewPlugin((FlutterActivity) registrar.activity()));
 
@@ -143,6 +185,11 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
             mapViewOptions = (Map<String, Object>) args.get("mapView");
 
+            if (args.containsKey("id")) {
+
+                id = (String) args.get("id");
+
+            }
         }
 
         //显示地图
@@ -151,6 +198,14 @@ public class BaseMapviewPlugin implements MethodCallHandler {
             showMapViewAction();
 
         }
+
+        //移除
+        if (call.method.equals("remove")) {
+
+            removeKeyAction();
+
+        }
+
         //定位
         else if (call.method.equals("location")) {
 
@@ -225,25 +280,32 @@ public class BaseMapviewPlugin implements MethodCallHandler {
     /**
      * 定位
      */
+    @TargetApi(Build.VERSION_CODES.M)
     private void locationAction() {
-        Acp.getInstance(root).request(new AcpOptions.Builder()
-                        .setPermissions(Manifest.permission.ACCESS_COARSE_LOCATION)
-                        .build(),
-                new AcpListener() {
-                    @Override
-                    public void onGranted() {
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                mapView.animateCamera(mapView.getLatLng());
-                            }
-                        }, 2000);
-                    }
+        if (root.checkSelfPermission((Manifest.permission.ACCESS_COARSE_LOCATION)) == PackageManager.PERMISSION_GRANTED) {
 
-                    @Override
-                    public void onDenied(List<String> permissions) {
-                    }
-                });
+            mapView.animateCamera(mapView.getLatLng());
+
+        } else {
+            Acp.getInstance(root).request(new AcpOptions.Builder()
+                            .setPermissions(Manifest.permission.ACCESS_COARSE_LOCATION)
+                            .build(),
+                    new AcpListener() {
+                        @Override
+                        public void onGranted() {
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mapView.animateCamera(mapView.getLatLng());
+                                }
+                            }, 2000);
+                        }
+
+                        @Override
+                        public void onDenied(List<String> permissions) {
+                        }
+                    });
+        }
     }
 
     /**
@@ -253,17 +315,33 @@ public class BaseMapviewPlugin implements MethodCallHandler {
         root.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mapView = new ASMapView(root);
+                mapView = createView(id);
 
                 mapView.onCreate(new Bundle());
 
                 mapView.onResume();
 
-                mapView.init(mapViewOptions);
+                mapView.init(mapViewOptions, channel);
 
                 root.addContentView(mapView, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 1000));
             }
         });
+    }
+
+    /**
+     * 移除key
+     */
+    private void removeKeyAction() {
+
+        View view = map.get(id);
+
+        if (view != null) {
+
+            ViewGroup viewGroup = (ViewGroup) view.getParent();
+
+            viewGroup.removeView(view);
+
+        }
     }
 
     /**

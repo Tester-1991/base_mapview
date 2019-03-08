@@ -24,8 +24,11 @@ import com.amap.api.maps.model.Polyline;
 import com.amap.api.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import io.flutter.plugin.common.MethodChannel;
 
 /**
  * Created by shiyan on 2019/3/6
@@ -48,6 +51,8 @@ public class ASMapView extends MapView {
 
     private Polygon polygon;
 
+    private String key;
+
     public ASMapView(Context context) {
         super(context);
     }
@@ -63,7 +68,7 @@ public class ASMapView extends MapView {
     /**
      * 初始化方法
      */
-    public void init(Map<String, Object> mapViewOptions) {
+    public void init(Map<String, Object> mapViewOptions, final MethodChannel methodChannel) {
         MyLocationStyle myLocationStyle = new MyLocationStyle();
 
         //连续定位、视角不移动到地图中心点
@@ -111,6 +116,17 @@ public class ASMapView extends MapView {
             public void onMyLocationChange(Location location) {
                 //获取当前经度纬度
                 latLng = new LatLng(location.getLatitude(), location.getLongitude());
+
+                //回调通知
+                Map<String,Object> map = new HashMap<>();
+                //经度
+                map.put("latitude",location.getLatitude());
+                //纬度
+                map.put("longitude",location.getLongitude());
+                //id
+                map.put("id",key);
+
+                methodChannel.invokeMethod("locationUpdate",map);
             }
         });
 
@@ -135,6 +151,22 @@ public class ASMapView extends MapView {
 
         getMap().moveCamera(CameraUpdateFactory.zoomTo((float) zoomLevel));
 
+    }
+
+    /**
+     * 获取key
+     * @return
+     */
+    public String getKey() {
+        return key;
+    }
+
+    /**
+     * 设置key
+     * @param key
+     */
+    public void setKey(String key) {
+        this.key = key;
     }
 
     /**

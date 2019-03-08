@@ -30,6 +30,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     LatLng(39.823083, 116.294776).toMap(),
   ];
 
+  Key _key0;
+
+  @override
+  void initState() {
+    _key0 = AMapView.createKey(_key0);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -40,9 +48,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           body: Column(
             children: <Widget>[
               AMapView(
+                key: _key0,
                 mapType: MapType.satellite,
                 centerCoordinate: LatLng(43.99791, 125.397968),
                 zoomLevel: 10,
+                onLocationChange: (LatLng latlng) {
+                  print(latlng.toString());
+                },
               ),
               Wrap(
                 children: <Widget>[
