@@ -16,6 +16,7 @@ import com.mylhyl.acp.AcpOptions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import io.flutter.app.FlutterActivity;
 import io.flutter.plugin.common.MethodCall;
@@ -43,7 +44,7 @@ public class BaseMapviewPlugin implements MethodCallHandler {
     private String[] maniFests = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
     //构造函数
-    public BaseMapviewPlugin(FlutterActivity activity, MethodChannel channel) {
+    public BaseMapviewPlugin(FlutterActivity activity) {
         this.root = activity;
         //处理生命周期
         this.root.getApplication().registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
@@ -119,8 +120,10 @@ public class BaseMapviewPlugin implements MethodCallHandler {
      * @param registrar
      */
     public static void registerWith(Registrar registrar) {
+
         final MethodChannel channel = new MethodChannel(registrar.messenger(), "flutter_amap");
-        channel.setMethodCallHandler(new BaseMapviewPlugin((FlutterActivity) registrar.activity(), channel));
+
+        channel.setMethodCallHandler(new BaseMapviewPlugin((FlutterActivity) registrar.activity()));
 
     }
 
@@ -137,55 +140,45 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
         //获取地图参数配置信息
         if (args != null && args.containsKey("mapView")) {
+
             mapViewOptions = (Map<String, Object>) args.get("mapView");
+
         }
 
         //显示地图
         if (call.method.equals("showMapView")) {
 
-            root.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mapView = new ASMapView(root);
-
-                    mapView.onCreate(new Bundle());
-
-                    mapView.onResume();
-
-                    mapView.init(mapViewOptions);
-
-                    root.addContentView(mapView, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 1000));
-                }
-            });
+            showMapViewAction();
 
         }
         //定位
         else if (call.method.equals("location")) {
+
             locationAction();
+
         }
+
         //添加marker
         else if (call.method.equals("addmarker")) {
 
-            List<LatLng> latlngList = new ArrayList<>();
-
-            LatLng latLng = new LatLng(39.833876, 116.301886);
-
-            latlngList.add(latLng);
-
-            mapView.addMarker(latlngList);
+            addMarkerAction();
 
         }
+
         //移除marker
         else if (call.method.equals("removemarker")) {
 
-            mapView.removeMarker();
+            removeMarkerAction();
 
         }
+
         //绘制圆形
         else if (call.method.equals("drawcircle")) {
-            //116.297241,39.825262
-            mapView.drawCircle(new LatLng(39.825262, 116.297241), 100);
+
+            drawCircleAction();
+
         }
+
         //绘制线
         else if (call.method.equals("drawpolylin")) {
             //116.30102,39.82588 116.302554,39.825847 116.300612,39.823853
@@ -227,22 +220,33 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
             mapView.drawPolygon(latlngList);
         }
+
         //切换地图图层
         else if (call.method.equals("setMapType")) {
-            int mapType = (int) mapViewOptions.get("mapType");
-            mapView.setMapType(mapType);
+
+            setMapTypeAction();
+
         }
+
         //放大地图级别
         else if (call.method.equals("zoomOut")) {
-            mapView.zoomOut();
+
+            zoomOutAction();
+
         }
+
         //缩小地图级别
         else if (call.method.equals("zoomIn")) {
-            mapView.zoomIn();
+
+            zoomInAction();
+
         }
+
         //无消息
         else {
+
             result.notImplemented();
+
         }
     }
 
@@ -268,6 +272,95 @@ public class BaseMapviewPlugin implements MethodCallHandler {
                     public void onDenied(List<String> permissions) {
                     }
                 });
+    }
+
+    /**
+     * 显示地图
+     */
+    private void showMapViewAction() {
+        root.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mapView = new ASMapView(root);
+
+                mapView.onCreate(new Bundle());
+
+                mapView.onResume();
+
+                mapView.init(mapViewOptions);
+
+                root.addContentView(mapView, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 1000));
+            }
+        });
+    }
+
+    /**
+     * 切换图层
+     */
+    private void setMapTypeAction() {
+
+        int mapType = (int) mapViewOptions.get("mapType");
+
+        mapView.setMapType(mapType);
+
+    }
+
+    /**
+     * 扩大地图层级
+     */
+    private void zoomOutAction() {
+
+        mapView.zoomOut();
+
+    }
+
+    /**
+     * 缩小地图层级
+     */
+    private void zoomInAction() {
+
+        mapView.zoomIn();
+
+    }
+
+    /**
+     * 添加marker
+     */
+    private void addMarkerAction() {
+
+        List<LatLng> latlngList = new ArrayList<>();
+
+        List<Map<String, Object>> list = (List) mapViewOptions.get("markerlist");
+
+        for (Map<String, Object> map : list) {
+
+            LatLng lantLng = new LatLng((double) map.get("latitude"), (double) map.get("longitude"));
+
+            latlngList.add(lantLng);
+        }
+
+        mapView.addMarker(latlngList);
+
+    }
+
+    /**
+     * 移除marker标记
+     */
+    private void removeMarkerAction() {
+
+        mapView.removeMarker();
+
+    }
+
+    /**
+     * 绘制圆形
+     */
+    private void drawCircleAction() {
+
+        Map<String, Object> roundcenterMap = (Map<String, Object>) mapViewOptions.get("roundcenter");
+
+        mapView.drawCircle(new LatLng((double) roundcenterMap.get("latitude"), (double) roundcenterMap.get("longitude")), (Double) mapViewOptions.get("radius"));
+
     }
 
 }

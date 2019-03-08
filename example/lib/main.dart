@@ -10,6 +10,14 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  List _list = [
+    LatLng(43.99791, 125.397968).toMap(),
+    LatLng(39.833876, 116.301886).toMap(),
+    LatLng(39.823862, 116.295385).toMap(),
+    LatLng(39.823734, 116.296299).toMap(),
+    LatLng(39.823083, 116.294776).toMap()
+  ];
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -37,7 +45,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   ),
                   RaisedButton(
                     onPressed: () {
-                      AMapView.channel.invokeMethod("addmarker");
+                      AMapView.channel.invokeMethod(
+                        "addmarker",
+                        {
+                          "mapView": {"markerlist": _list}
+                        },
+                      );
                     },
                     child: Text(
                       "添加marker",
@@ -55,7 +68,15 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   ),
                   RaisedButton(
                     onPressed: () {
-                      AMapView.channel.invokeMethod("drawcircle");
+                      AMapView.channel.invokeMethod(
+                        "drawcircle",
+                        {
+                          "mapView": {
+                            "roundcenter": LatLng(39.825262, 116.297241).toMap(),
+                            "radius": 100.0,
+                          }
+                        },
+                      );
                     },
                     child: Text(
                       "绘制圆形",

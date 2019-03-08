@@ -125,7 +125,9 @@ public class ASMapView extends MapView {
         Map<String, Object> coordinateMap = (Map<String, Object>) mapViewOptions.get("centerCoordinate");
 
         if (coordinateMap != null) {
+
             animateCamera(new LatLng((double) coordinateMap.get("latitude"), (double) coordinateMap.get("longitude")));
+
         }
 
         //设置地图缩放级别
