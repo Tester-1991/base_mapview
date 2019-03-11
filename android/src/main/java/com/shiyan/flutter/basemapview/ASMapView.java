@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 
 import com.amap.api.maps.AMap;
@@ -12,6 +13,7 @@ import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.UiSettings;
 import com.amap.api.maps.model.BitmapDescriptorFactory;
+import com.amap.api.maps.model.CameraPosition;
 import com.amap.api.maps.model.Circle;
 import com.amap.api.maps.model.CircleOptions;
 import com.amap.api.maps.model.LatLng;
@@ -22,6 +24,13 @@ import com.amap.api.maps.model.Polygon;
 import com.amap.api.maps.model.PolygonOptions;
 import com.amap.api.maps.model.Polyline;
 import com.amap.api.maps.model.PolylineOptions;
+import com.amap.api.services.core.AMapException;
+import com.amap.api.services.core.LatLonPoint;
+import com.amap.api.services.geocoder.GeocodeResult;
+import com.amap.api.services.geocoder.GeocodeSearch;
+import com.amap.api.services.geocoder.RegeocodeAddress;
+import com.amap.api.services.geocoder.RegeocodeQuery;
+import com.amap.api.services.geocoder.RegeocodeResult;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,9 +58,14 @@ public class ASMapView extends MapView {
     //线段
     private Polyline polyline;
 
+    //多边形
     private Polygon polygon;
 
+    //组件key
     private String key;
+
+    //逆地理编码功能
+    private GeocodeSearch geocodeSearch;
 
     public ASMapView(Context context) {
         super(context);
@@ -118,15 +132,46 @@ public class ASMapView extends MapView {
                 latLng = new LatLng(location.getLatitude(), location.getLongitude());
 
                 //回调通知
-                Map<String,Object> map = new HashMap<>();
+                Map<String, Object> map = new HashMap<>();
                 //经度
-                map.put("latitude",location.getLatitude());
+                map.put("latitude", location.getLatitude());
                 //纬度
-                map.put("longitude",location.getLongitude());
+                map.put("longitude", location.getLongitude());
                 //id
-                map.put("id",key);
+                map.put("id", key);
 
-//                methodChannel.invokeMethod("locationUpdate",map);
+                methodChannel.invokeMethod("locationUpdate", map);
+            }
+        });
+
+        //监听地图拖动和缩放事件
+        getMap().setOnCameraChangeListener(new AMap.OnCameraChangeListener() {
+            @Override
+            public void onCameraChange(CameraPosition cameraPosition) {
+                //得到屏幕中心的经纬度
+                LatLng target = cameraPosition.target;
+
+                //回调通知
+                Map<String, Object> map = new HashMap<>();
+                //经度
+                map.put("latitude", target.latitude);
+                //纬度
+                map.put("longitude", target.longitude);
+                //id
+                map.put("id", key);
+
+                methodChannel.invokeMethod("cameraChange", map);
+            }
+
+            @Override
+            public void onCameraChangeFinish(CameraPosition cameraPosition) {
+
+                LatLonPoint latLonPoint = new LatLonPoint(cameraPosition.target.latitude, cameraPosition.target.longitude);
+
+                //第一个参数表示一个Latlng，第二参数表示范围多少米，第三个参数表示是火系坐标系还是GPS原生坐标系
+                RegeocodeQuery query = new RegeocodeQuery(latLonPoint, 200, GeocodeSearch.AMAP);
+
+                geocodeSearch.getFromLocationAsyn(query);
             }
         });
 
@@ -151,10 +196,66 @@ public class ASMapView extends MapView {
 
         getMap().moveCamera(CameraUpdateFactory.zoomTo((float) zoomLevel));
 
+        //初始化逆向地理编码功能  地图拖动通过坐标点得到地址信息得到这个坐标点
+        geocodeSearch = new GeocodeSearch(getContext());
+
+        geocodeSearch.setOnGeocodeSearchListener(new GeocodeSearch.OnGeocodeSearchListener() {
+            /**
+             * 逆地理编码(坐标转地址)
+             */
+            @Override
+            public void onRegeocodeSearched(RegeocodeResult regeocodeResult, int rCode) {
+                //逆地理编码结果回调
+                RegeocodeAddress regeocodeAddress = regeocodeResult.getRegeocodeAddress();
+
+                if (rCode == AMapException.CODE_AMAP_SUCCESS) {
+                    if (TextUtils.isEmpty(regeocodeAddress.getProvince())) {
+
+                        return;
+                    }
+
+                    //省
+                    String province = regeocodeAddress.getProvince();
+
+                    //市
+                    String city = regeocodeAddress.getCity();
+
+                    //县级
+                    String district = regeocodeAddress.getDistrict();
+
+                    //乡镇
+                    String township = regeocodeAddress.getTownship();
+
+                    HashMap<String, Object> map = new HashMap<>();
+
+                    map.put("province", province);
+
+                    map.put("city", city);
+
+                    map.put("district", district);
+
+                    map.put("township", township);
+
+                    map.put("id", key);
+
+                    methodChannel.invokeMethod("regeocodeSearched", map);
+
+                } else {
+
+                }
+            }
+
+            @Override
+            public void onGeocodeSearched(GeocodeResult geocodeResult, int i) {
+
+            }
+        });
+
     }
 
     /**
      * 获取key
+     *
      * @return
      */
     public String getKey() {
@@ -163,6 +264,7 @@ public class ASMapView extends MapView {
 
     /**
      * 设置key
+     *
      * @param key
      */
     public void setKey(String key) {
@@ -340,7 +442,7 @@ public class ASMapView extends MapView {
     /**
      * 缩小地图级别
      */
-    public void zoomIn(){
+    public void zoomIn() {
         getMap().moveCamera(CameraUpdateFactory.zoomIn());
     }
 }

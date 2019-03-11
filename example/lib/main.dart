@@ -1,5 +1,7 @@
+import 'package:base_mapview/LocalWeatherLive.dart';
+import 'package:base_mapview/RegeocodeAddress.dart';
 import 'package:base_mapview/Tip.dart';
-import 'package:base_mapview/latlng.dart';
+import 'package:base_mapview/LatLng.dart';
 import 'package:flutter/material.dart';
 import 'package:base_mapview/amap_view.dart';
 
@@ -60,6 +62,21 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   for (Tip tip in datalist) {
                     print("flutter提示信息:$tip");
                   }
+                },
+                onCameraChange: (LatLng latlng) {
+                  print("中心点:" + latlng.toString());
+                },
+                onRegeocodeSearched: (RegeocodeAddress address) {
+                  print(address.toString());
+
+                  //获取天气信息
+                  AMapView.channel.invokeMethod("queryWeatherbyCity", {
+                    "mapView": {"city": address.city}
+                  });
+                },
+
+                onWeatherLiveSearched: (LocalWeatherLive weather){
+                  print("实时天气:"+ weather.city + "-温度" + weather.temperature + "-天气" + weather.weather);
                 },
               ),
               Wrap(

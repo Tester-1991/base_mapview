@@ -17,6 +17,11 @@ import com.amap.api.maps.model.LatLng;
 import com.amap.api.services.help.Inputtips;
 import com.amap.api.services.help.InputtipsQuery;
 import com.amap.api.services.help.Tip;
+import com.amap.api.services.weather.LocalWeatherForecastResult;
+import com.amap.api.services.weather.LocalWeatherLive;
+import com.amap.api.services.weather.LocalWeatherLiveResult;
+import com.amap.api.services.weather.WeatherSearch;
+import com.amap.api.services.weather.WeatherSearchQuery;
 import com.mylhyl.acp.Acp;
 import com.mylhyl.acp.AcpListener;
 import com.mylhyl.acp.AcpOptions;
@@ -277,6 +282,11 @@ public class BaseMapviewPlugin implements MethodCallHandler {
             queryInputeDataAction();
         }
 
+        //查询天气信息
+        else if (call.method.equals("queryWeatherbyCity")) {
+            queryWeatherbyCityAction();
+        }
+
         //无消息
         else {
 
@@ -520,11 +530,105 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
                     dataMap.put("datalist", dataList);
 
-                    channel.invokeMethod("onGetInputtips", dataMap);
+                    channel.invokeMethod("getInputtips", dataMap);
                 }
             }
         });
 
         inputTips.requestInputtipsAsyn();
+    }
+
+    /**
+     * 获取城市列表的天气状况  这个方法应该在拖动地图后
+     * 得到地图中间的坐标城市结果出来后调用
+     */
+    public void queryWeatherbyCityAction() {
+
+        String city = (String) mapViewOptions.get("city");
+
+        //检索参数为城市和天气类型，实况天气为WEATHER_TYPE_LIVE、天气预报为WEATHER_TYPE_FORECAST
+        WeatherSearchQuery mquery = new WeatherSearchQuery(city, WeatherSearchQuery.WEATHER_TYPE_LIVE);
+
+        WeatherSearch mweathersearch = new WeatherSearch(root);
+
+        mweathersearch.setOnWeatherSearchListener(new WeatherSearch.OnWeatherSearchListener() {
+            @Override
+            public void onWeatherLiveSearched(LocalWeatherLiveResult weatherLiveResult, int rCode) {
+                if (rCode == 1000) {
+
+                    if (weatherLiveResult != null && weatherLiveResult.getLiveResult() != null) {
+
+                        LocalWeatherLive weatherlive = weatherLiveResult.getLiveResult();
+
+                        //行政区划代码
+                        String adCode = weatherlive.getAdCode();
+
+                        //城市名称
+                        String city = weatherlive.getCity();
+
+                        //空气湿度的百分比
+                        String humidity = weatherlive.getHumidity();
+
+                        //省份
+                        String province = weatherlive.getProvince();
+
+                        //实时数据发布时间
+                        String reprotTime = weatherlive.getReportTime();
+
+                        //温度
+                        String temperature = weatherlive.getTemperature();
+
+                        //天气
+                        String weather = weatherlive.getWeather();
+
+                        //风向
+                        String windDirection = weatherlive.getWindDirection();
+
+                        //风力
+                        String windPower = weatherlive.getWindPower();
+
+                        HashMap<String, Object> map = new HashMap<>();
+
+                        map.put("adCode", adCode);
+
+                        map.put("city", city);
+
+                        map.put("humidity", humidity);
+
+                        map.put("province", province);
+
+                        map.put("reprotTime", reprotTime);
+
+                        map.put("temperature", temperature);
+
+                        map.put("weather", weather);
+
+                        map.put("windDirection", windDirection);
+
+                        map.put("windPower", windPower);
+
+                        map.put("id", id);
+
+                        channel.invokeMethod("weatherLiveSearched", map);
+
+                    } else {
+
+                    }
+
+                } else {
+
+                }
+            }
+
+            @Override
+            public void onWeatherForecastSearched(LocalWeatherForecastResult localWeatherForecastResult, int i) {
+
+            }
+        });
+
+        mweathersearch.setQuery(mquery);
+
+        //异步搜索
+        mweathersearch.searchWeatherAsyn();
     }
 }

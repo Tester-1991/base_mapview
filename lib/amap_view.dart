@@ -1,5 +1,7 @@
+import 'package:base_mapview/LocalWeatherLive.dart';
+import 'package:base_mapview/RegeocodeAddress.dart';
 import 'package:base_mapview/Tip.dart';
-import 'package:base_mapview/latlng.dart';
+import 'package:base_mapview/LatLng.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -8,6 +10,15 @@ typedef void LocationChange(LatLng latlng);
 
 ///搜索提示回调接口
 typedef void OnGetInputtips(List<Tip> list);
+
+///地图中心点经纬度回调接口
+typedef void OnCameraChange(LatLng latlng);
+
+///逆地理编码
+typedef void OnRegeocodeSearched(RegeocodeAddress address);
+
+///实时天气
+typedef void OnWeatherLiveSearched(LocalWeatherLive weather);
 
 ///地图类型
 enum MapType { standard, satellite, night, nav, bus }
@@ -31,6 +42,15 @@ class AMapView extends StatefulWidget {
 
   ///搜索提示回调
   final OnGetInputtips onGetInputtips;
+
+  ///地图发生变化
+  final OnCameraChange onCameraChange;
+
+  ///逆地理编码
+  final OnRegeocodeSearched onRegeocodeSearched;
+
+  ///实时天气查询
+  final OnWeatherLiveSearched onWeatherLiveSearched;
 
   static Map<String, GlobalKey> map = {};
 
@@ -59,7 +79,7 @@ class AMapView extends StatefulWidget {
 
     Map args = call.arguments;
     String id = args["id"];
-    //print("$id $args");
+    print("$id $args");
     GlobalKey key = map[id];
     if (key != null) {
       view = key.currentWidget;
@@ -69,13 +89,12 @@ class AMapView extends StatefulWidget {
       case "locationUpdate":
         view?.onLocationChange(LatLng.fromMap(args));
         return new Future.value("");
-      case "onGetInputtips":
+      case "getInputtips":
         List tipsList = args["datalist"];
 
         List<Tip> dataList = List();
 
         for (int i = 0; i < tipsList.length; i++) {
-
           Map map = tipsList[i];
 
           Tip tip = Tip.fromMap(map);
@@ -85,6 +104,15 @@ class AMapView extends StatefulWidget {
 
         view?.onGetInputtips(dataList);
 
+        return new Future.value("");
+      case "cameraChange":
+        view?.onCameraChange(LatLng.fromMap(args));
+        return new Future.value("");
+      case "regeocodeSearched":
+        view?.onRegeocodeSearched(RegeocodeAddress.fromMap(args));
+        return new Future.value("");
+      case "weatherLiveSearched":
+        view?.onWeatherLiveSearched(LocalWeatherLive.fromMap(args));
         return new Future.value("");
     }
     return new Future.value("");
@@ -96,6 +124,9 @@ class AMapView extends StatefulWidget {
     this.zoomLevel: 10,
     this.onLocationChange,
     this.onGetInputtips,
+    this.onCameraChange,
+    this.onRegeocodeSearched,
+    this.onWeatherLiveSearched,
     Key key,
   }) : super(key: key);
 
