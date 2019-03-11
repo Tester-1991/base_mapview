@@ -1,3 +1,4 @@
+import 'package:base_mapview/Tip.dart';
 import 'package:base_mapview/latlng.dart';
 import 'package:flutter/material.dart';
 import 'package:base_mapview/amap_view.dart';
@@ -53,7 +54,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 centerCoordinate: LatLng(43.99791, 125.397968),
                 zoomLevel: 10,
                 onLocationChange: (LatLng latlng) {
-                  print(latlng.toString());
+                  //print(latlng.toString());
+                },
+                onGetInputtips: (List<Tip> datalist) {
+                  for (Tip tip in datalist) {
+                    print("flutter提示信息:$tip");
+                  }
                 },
               ),
               Wrap(
@@ -179,6 +185,20 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     },
                     child: Text(
                       "缩小地图",
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                  RaisedButton(
+                    onPressed: () {
+                      AMapView.channel.invokeMethod(
+                        "queryInputeData",
+                        {
+                          "mapView": {"keyword": "北京"}
+                        },
+                      );
+                    },
+                    child: Text(
+                      "搜索提示",
                       style: TextStyle(color: Colors.red),
                     ),
                   ),

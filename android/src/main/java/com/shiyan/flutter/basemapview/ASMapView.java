@@ -126,7 +126,7 @@ public class ASMapView extends MapView {
                 //id
                 map.put("id",key);
 
-                methodChannel.invokeMethod("locationUpdate",map);
+//                methodChannel.invokeMethod("locationUpdate",map);
             }
         });
 

@@ -38,6 +38,10 @@ dependencies {
     //3D地图so及jar
     implementation 'com.amap.api:3dmap:latest.integration'
 
+    //搜索
+    implementation 'com.amap.api:search:latest.integration'
+
+    //权限处理
     implementation 'com.mylhyl:acp:1.2.0'
 
 }

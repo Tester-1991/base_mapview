@@ -1,8 +1,13 @@
+import 'package:base_mapview/Tip.dart';
 import 'package:base_mapview/latlng.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+///定位回调接口
 typedef void LocationChange(LatLng latlng);
+
+///搜索提示回调接口
+typedef void OnGetInputtips(List<Tip> list);
 
 ///地图类型
 enum MapType { standard, satellite, night, nav, bus }
@@ -23,6 +28,9 @@ class AMapView extends StatefulWidget {
 
   ///定位回调
   final LocationChange onLocationChange;
+
+  ///搜索提示回调
+  final OnGetInputtips onGetInputtips;
 
   static Map<String, GlobalKey> map = {};
 
@@ -46,19 +54,38 @@ class AMapView extends StatefulWidget {
 
   static Future<dynamic> _handleMethod(MethodCall call) async {
     String method = call.method;
+
+    AMapView view;
+
+    Map args = call.arguments;
+    String id = args["id"];
+    //print("$id $args");
+    GlobalKey key = map[id];
+    if (key != null) {
+      view = key.currentWidget;
+    }
+
     switch (method) {
       case "locationUpdate":
-        {
-          Map args = call.arguments;
-          String id = args["id"];
-          print("$id $args");
-          GlobalKey key = map[id];
-          if (key != null) {
-            AMapView view = key.currentWidget;
-            view?.onLocationChange(LatLng.fromMap(args));
-          }
-          return new Future.value("");
+        view?.onLocationChange(LatLng.fromMap(args));
+        return new Future.value("");
+      case "onGetInputtips":
+        List tipsList = args["datalist"];
+
+        List<Tip> dataList = List();
+
+        for (int i = 0; i < tipsList.length; i++) {
+
+          Map map = tipsList[i];
+
+          Tip tip = Tip.fromMap(map);
+
+          dataList.add(tip);
         }
+
+        view?.onGetInputtips(dataList);
+
+        return new Future.value("");
     }
     return new Future.value("");
   }
@@ -68,6 +95,7 @@ class AMapView extends StatefulWidget {
     this.centerCoordinate,
     this.zoomLevel: 10,
     this.onLocationChange,
+    this.onGetInputtips,
     Key key,
   }) : super(key: key);
 

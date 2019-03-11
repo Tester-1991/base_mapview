@@ -8,20 +8,23 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import com.amap.api.maps.model.LatLng;
+import com.amap.api.services.help.Inputtips;
+import com.amap.api.services.help.InputtipsQuery;
+import com.amap.api.services.help.Tip;
 import com.mylhyl.acp.Acp;
 import com.mylhyl.acp.AcpListener;
 import com.mylhyl.acp.AcpOptions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.flutter.app.FlutterActivity;
@@ -269,6 +272,11 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
         }
 
+        //输入内容自动提示
+        else if (call.method.equals("queryInputeData")) {
+            queryInputeDataAction();
+        }
+
         //无消息
         else {
 
@@ -452,4 +460,71 @@ public class BaseMapviewPlugin implements MethodCallHandler {
         mapView.drawPolygon(latlngList);
     }
 
+    /**
+     * 输入内容自动提示
+     */
+    private void queryInputeDataAction() {
+        //获取关键字
+        String keyWord = (String) mapViewOptions.get("keyword");
+
+        if (TextUtils.isEmpty(keyWord)) return;
+
+        //第二个参数传入null或者“”代表在全国进行检索，否则按照传入的city进行检索
+        InputtipsQuery inputquery = new InputtipsQuery(keyWord, "");
+
+        Inputtips inputTips = new Inputtips(root, inputquery);
+
+        inputTips.setInputtipsListener(new Inputtips.InputtipsListener() {
+            @Override
+            public void onGetInputtips(List<Tip> list, int rCode) {
+                if (rCode == 1000 && list != null && list.size() > 0) {
+                    List<Map<String, Object>> dataList = new ArrayList<>();
+
+                    for (Tip tip : list) {                 //挑出虚假数据
+                        if (!TextUtils.isEmpty(tip.getPoiID()) && tip.getPoint() != null) {
+                            Map<String, Object> map = new HashMap<>();
+                            //获取Poi的ID
+                            map.put("poiId", tip.getPoiID());
+
+                            //获取经度
+                            map.put("longitude", String.valueOf(tip.getPoint().getLongitude()));
+
+                            //获取纬度
+                            map.put("latitude", String.valueOf(tip.getPoint().getLatitude()));
+
+                            //获取提示名称
+                            map.put("name", tip.getName());
+
+                            //获取提示区域
+                            map.put("district", tip.getDistrict());
+
+                            //获取提示区域编码
+                            map.put("adcode", tip.getAdcode());
+
+                            //获取详细地址
+                            map.put("address", tip.getAddress());
+
+                            //获取输入提示结果的类型编码
+                            map.put("typeCode", tip.getTypeCode());
+
+                            dataList.add(map);
+                        }
+                    }
+
+
+                    if (dataList.size() <= 0) return;
+
+                    Map<String, Object> dataMap = new HashMap<>();
+
+                    dataMap.put("id", id);
+
+                    dataMap.put("datalist", dataList);
+
+                    channel.invokeMethod("onGetInputtips", dataMap);
+                }
+            }
+        });
+
+        inputTips.requestInputtipsAsyn();
+    }
 }
