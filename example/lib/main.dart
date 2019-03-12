@@ -34,6 +34,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     LatLng(39.823083, 116.294776).toMap(),
   ];
 
+  Wms _wms = Wms(true, true, true, true, true, true);
+
   Key _key0;
 
   @override
@@ -86,6 +88,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 onMarkerClick: (LatLng latlng) {
                   print("marker click:" + latlng.toString());
                 },
+                wms: _wms,
               ),
               Wrap(
                 children: <Widget>[

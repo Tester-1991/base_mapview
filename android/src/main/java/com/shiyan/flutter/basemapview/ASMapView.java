@@ -203,23 +203,33 @@ public class ASMapView extends MapView {
         if (mapViewOptions == null) return;
 
         //设置地图模式
-        int mapType = (int) mapViewOptions.get("mapType");
+        if (mapViewOptions.containsKey("mapType")) {
 
-        setMapType(mapType);
+            int mapType = (int) mapViewOptions.get("mapType");
+
+            setMapType(mapType);
+        }
 
         //中心点设置
-        Map<String, Object> coordinateMap = (Map<String, Object>) mapViewOptions.get("centerCoordinate");
+        if (mapViewOptions.containsKey("centerCoordinate")) {
 
-        if (coordinateMap != null) {
+            Map<String, Object> coordinateMap = (Map<String, Object>) mapViewOptions.get("centerCoordinate");
 
-            animateCamera(new LatLng((double) coordinateMap.get("latitude"), (double) coordinateMap.get("longitude")));
+            if (coordinateMap != null) {
 
+                animateCamera(new LatLng((double) coordinateMap.get("latitude"), (double) coordinateMap.get("longitude")));
+
+            }
         }
 
         //设置地图缩放级别
-        double zoomLevel = (double) mapViewOptions.get("zoomLevel");
+        if (mapViewOptions.containsKey("zoomLevel")) {
 
-        getMap().moveCamera(CameraUpdateFactory.zoomTo((float) zoomLevel));
+            double zoomLevel = (double) mapViewOptions.get("zoomLevel");
+
+            getMap().moveCamera(CameraUpdateFactory.zoomTo((float) zoomLevel));
+
+        }
 
         //初始化逆向地理编码功能  地图拖动通过坐标点得到地址信息得到这个坐标点
         geocodeSearch = new GeocodeSearch(getContext());
@@ -296,6 +306,35 @@ public class ASMapView extends MapView {
 
             return true;
         });
+
+        //设置是否显示wms图层
+        if (mapViewOptions.containsKey("wms")) {
+
+            Map wmsMap = (Map) mapViewOptions.get("wms");
+
+            if (wmsMap != null) {
+                //机场净空区
+                boolean airport = (boolean) wmsMap.get("airport");
+
+                //禁飞区
+                boolean jfq = (boolean) wmsMap.get("jfq");
+
+                //限制区
+                boolean xzq = (boolean) wmsMap.get("xzq");
+
+                //危险区
+                boolean wxq = (boolean) wmsMap.get("wxq");
+
+                //固定飞场
+                boolean gdfc = (boolean) wmsMap.get("gdfc");
+
+                //临时任务区
+                boolean lsrwq = (boolean) wmsMap.get("lsrwq");
+
+                initWms(airport, jfq, xzq, wxq, gdfc, lsrwq);
+
+            }
+        }
     }
 
     /**

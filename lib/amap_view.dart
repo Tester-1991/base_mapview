@@ -2,6 +2,7 @@ import 'package:base_mapview/local_weather_live.dart';
 import 'package:base_mapview/regeocode_address.dart';
 import 'package:base_mapview/tip.dart';
 import 'package:base_mapview/lat_lng.dart';
+import 'package:base_mapview/wms.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -57,6 +58,8 @@ class AMapView extends StatefulWidget {
 
   ///marker点击事件
   final OnMarkerClick onMarkerClick;
+
+  final Wms wms;
 
   static Map<String, GlobalKey> map = {};
 
@@ -137,6 +140,7 @@ class AMapView extends StatefulWidget {
     this.onRegeocodeSearched,
     this.onWeatherLiveSearched,
     this.onMarkerClick,
+    this.wms,
     Key key,
   }) : super(key: key);
 
@@ -146,6 +150,7 @@ class AMapView extends StatefulWidget {
       "centerCoordinate":
           this.centerCoordinate != null ? this.centerCoordinate.toMap() : null,
       "zoomLevel": this.zoomLevel,
+      "wms":this.wms.toMap(),
     };
   }
 
