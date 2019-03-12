@@ -1,7 +1,7 @@
-import 'package:base_mapview/LocalWeatherLive.dart';
-import 'package:base_mapview/RegeocodeAddress.dart';
-import 'package:base_mapview/Tip.dart';
-import 'package:base_mapview/LatLng.dart';
+import 'package:base_mapview/local_weather_live.dart';
+import 'package:base_mapview/regeocode_address.dart';
+import 'package:base_mapview/tip.dart';
+import 'package:base_mapview/lat_lng.dart';
 import 'package:flutter/material.dart';
 import 'package:base_mapview/amap_view.dart';
 
@@ -74,9 +74,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     "mapView": {"city": address.city}
                   });
                 },
-
-                onWeatherLiveSearched: (LocalWeatherLive weather){
-                  print("实时天气:"+ weather.city + "-温度" + weather.temperature + "-天气" + weather.weather);
+                onWeatherLiveSearched: (LocalWeatherLive weather) {
+                  print("实时天气:" +
+                      weather.city +
+                      "-温度" +
+                      weather.temperature +
+                      "-天气" +
+                      weather.weather);
+                },
+                onMarkerClick: (LatLng latlng) {
+                  print("marker click:" + latlng.toString());
                 },
               ),
               Wrap(

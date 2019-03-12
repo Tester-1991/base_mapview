@@ -1,7 +1,7 @@
-import 'package:base_mapview/LocalWeatherLive.dart';
-import 'package:base_mapview/RegeocodeAddress.dart';
-import 'package:base_mapview/Tip.dart';
-import 'package:base_mapview/LatLng.dart';
+import 'package:base_mapview/local_weather_live.dart';
+import 'package:base_mapview/regeocode_address.dart';
+import 'package:base_mapview/tip.dart';
+import 'package:base_mapview/lat_lng.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -19,6 +19,9 @@ typedef void OnRegeocodeSearched(RegeocodeAddress address);
 
 ///实时天气
 typedef void OnWeatherLiveSearched(LocalWeatherLive weather);
+
+///marker点击事件
+typedef void OnMarkerClick(LatLng latlng);
 
 ///地图类型
 enum MapType { standard, satellite, night, nav, bus }
@@ -51,6 +54,9 @@ class AMapView extends StatefulWidget {
 
   ///实时天气查询
   final OnWeatherLiveSearched onWeatherLiveSearched;
+
+  ///marker点击事件
+  final OnMarkerClick onMarkerClick;
 
   static Map<String, GlobalKey> map = {};
 
@@ -114,6 +120,9 @@ class AMapView extends StatefulWidget {
       case "weatherLiveSearched":
         view?.onWeatherLiveSearched(LocalWeatherLive.fromMap(args));
         return new Future.value("");
+      case "markerClick":
+        view?.onMarkerClick(LatLng.fromMap(args));
+        return new Future.value("");
     }
     return new Future.value("");
   }
@@ -127,6 +136,7 @@ class AMapView extends StatefulWidget {
     this.onCameraChange,
     this.onRegeocodeSearched,
     this.onWeatherLiveSearched,
+    this.onMarkerClick,
     Key key,
   }) : super(key: key);
 

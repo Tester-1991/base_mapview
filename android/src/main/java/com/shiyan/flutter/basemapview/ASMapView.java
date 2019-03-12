@@ -1,5 +1,6 @@
 package com.shiyan.flutter.basemapview;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -66,6 +67,9 @@ public class ASMapView extends MapView {
 
     //逆地理编码功能
     private GeocodeSearch geocodeSearch;
+
+    //屏幕中间图标
+    private Marker marker;
 
     public ASMapView(Context context) {
         super(context);
@@ -251,6 +255,26 @@ public class ASMapView extends MapView {
             }
         });
 
+        initScreenMarker();
+
+        getMap().setOnMarkerClickListener(marker -> {
+
+            LatLng position = marker.getPosition();
+
+            //返回marker当前数据给flutter
+            //回调通知
+            Map<String, Object> map = new HashMap<>();
+            //经度
+            map.put("latitude", position.latitude);
+            //纬度
+            map.put("longitude", position.longitude);
+            //id
+            map.put("id", key);
+
+            methodChannel.invokeMethod("markerClick", map);
+
+            return true;
+        });
     }
 
     /**
@@ -278,6 +302,33 @@ public class ASMapView extends MapView {
      */
     public LatLng getLatLng() {
         return latLng;
+    }
+
+    /**
+     * 安卓o没办法适配刘海屏 过一秒获取地图的高度来配饰
+     * 初始化 并添加屏幕中间的marker
+     */
+    @SuppressLint("CheckResult")
+    public void initScreenMarker() {
+        if (marker == null) {
+            post(() -> {
+
+                MarkerOptions markerOption = new MarkerOptions();
+
+                //设置Marker不可拖动
+                markerOption.draggable(false);
+
+                markerOption.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory
+                        .decodeResource(getResources(), R.mipmap.dw)));
+
+                marker = getMap().addMarker(markerOption);
+
+                marker.setPositionByPixels(Util.getScreenWidth(getContext()) / 2
+                        , getTop() + getHeight() / 2);
+
+            });
+
+        }
     }
 
     /**
@@ -360,7 +411,7 @@ public class ASMapView extends MapView {
             markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory
                     .decodeResource(getContext().getResources(), R.mipmap.area_dot)));
 
-            getMap().addMarker(markerOptions);
+            Marker marker = getMap().addMarker(markerOptions);
 
         }
     }
@@ -445,4 +496,5 @@ public class ASMapView extends MapView {
     public void zoomIn() {
         getMap().moveCamera(CameraUpdateFactory.zoomIn());
     }
+
 }
