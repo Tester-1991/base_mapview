@@ -25,6 +25,8 @@ import com.amap.api.maps.model.Polygon;
 import com.amap.api.maps.model.PolygonOptions;
 import com.amap.api.maps.model.Polyline;
 import com.amap.api.maps.model.PolylineOptions;
+import com.amap.api.maps.model.TileOverlay;
+import com.amap.api.maps.model.TileOverlayOptions;
 import com.amap.api.services.core.AMapException;
 import com.amap.api.services.core.LatLonPoint;
 import com.amap.api.services.geocoder.GeocodeResult;
@@ -70,6 +72,25 @@ public class ASMapView extends MapView {
 
     //屏幕中间图标
     private Marker marker;
+
+    //禁飞区图层
+    private TileOverlay jfqOverlay;
+
+    //危险区图层
+    private TileOverlay wxqOverlay;
+
+    //限制区图层
+    private TileOverlay xzqOverlay;
+
+    //机场图层
+    private TileOverlay airportOverlay;
+
+    //固定飞场图层
+    private TileOverlay gdfcOverlay;
+
+    //临时任务区图层
+    private TileOverlay lsrwqOverlay;
+
 
     public ASMapView(Context context) {
         super(context);
@@ -495,6 +516,188 @@ public class ASMapView extends MapView {
      */
     public void zoomIn() {
         getMap().moveCamera(CameraUpdateFactory.zoomIn());
+    }
+
+
+    /**
+     * 显示禁飞区图层
+     */
+    public void initWms(boolean airport, boolean jfq, boolean xzq, boolean wxq, boolean gdfc, boolean lsrwq) {
+        //机场净空区
+        if (airport) {
+
+            if (airportOverlay == null) {
+
+                HeritageScopeTileProvider airportProvider = new HeritageScopeTileProvider(HeritageScopeTileProvider.AIRPORT);
+
+                TileOverlayOptions airportOptions = new TileOverlayOptions().tileProvider(airportProvider);
+
+                airportOptions
+                        .diskCacheDir("/storage/amap/cache")
+                        .diskCacheEnabled(true)
+                        .diskCacheSize(100000)
+                        .zIndex(-1);
+
+                airportOverlay = getMap().addTileOverlay(airportOptions);
+            }
+
+        } else {
+
+            if (airportOverlay != null) {
+
+                airportOverlay.remove();
+
+                airportOverlay = null;
+            }
+
+        }
+
+        if (jfq) {
+
+            if (jfqOverlay == null) {
+
+                HeritageScopeTileProvider jfqProvider = new HeritageScopeTileProvider(HeritageScopeTileProvider.JFQ);
+
+                TileOverlayOptions jfqOptions = new TileOverlayOptions().tileProvider(jfqProvider);
+
+                jfqOptions
+                        .diskCacheDir("/storage/amap/cache")
+                        .diskCacheEnabled(true)
+                        .diskCacheSize(100000);
+
+                jfqOverlay = getMap().addTileOverlay(jfqOptions);
+
+            }
+
+        } else {
+
+            if (jfqOverlay != null) {
+
+                jfqOverlay.remove();
+
+                jfqOverlay = null;
+
+            }
+
+        }
+
+        if (wxq) {
+
+            if (wxqOverlay == null) {
+
+                HeritageScopeTileProvider wxqProvider = new HeritageScopeTileProvider(HeritageScopeTileProvider.WXQ);
+
+                TileOverlayOptions wxqOptions = new TileOverlayOptions().tileProvider(wxqProvider);
+
+                wxqOptions
+                        .diskCacheDir("/storage/amap/cache")
+                        .diskCacheEnabled(true)
+                        .diskCacheSize(100000);
+
+                wxqOverlay = getMap().addTileOverlay(wxqOptions);
+
+            }
+
+        } else {
+
+            if (wxqOverlay != null) {
+
+                wxqOverlay.remove();
+
+                wxqOverlay = null;
+
+            }
+
+        }
+
+        if (xzq) {
+
+            if (xzqOverlay == null) {
+
+                HeritageScopeTileProvider xzqProvider = new HeritageScopeTileProvider(HeritageScopeTileProvider.XZQ);
+
+                TileOverlayOptions xzqOptions = new TileOverlayOptions().tileProvider(xzqProvider);
+
+                xzqOptions
+                        .diskCacheDir("/storage/amap/cache")
+                        .diskCacheEnabled(true)
+                        .diskCacheSize(100000);
+
+                xzqOverlay = getMap().addTileOverlay(xzqOptions);
+
+            }
+
+        } else {
+
+            if (xzqOverlay != null) {
+
+                xzqOverlay.remove();
+
+                xzqOverlay = null;
+
+            }
+
+        }
+
+        //固定飞场
+        if (gdfc) {
+
+            if (gdfcOverlay == null) {
+
+                HeritageScopeTileProvider gdfcProvider = new HeritageScopeTileProvider(HeritageScopeTileProvider.GDFC);
+
+                TileOverlayOptions gdfcOptions = new TileOverlayOptions().tileProvider(gdfcProvider);
+
+                gdfcOptions
+                        .diskCacheDir("/storage/amap/cache")
+                        .diskCacheEnabled(true)
+                        .diskCacheSize(100000);
+
+                gdfcOverlay = getMap().addTileOverlay(gdfcOptions);
+
+            }
+
+        } else {
+
+            if (gdfcOverlay != null) {
+
+                gdfcOverlay.remove();
+
+                gdfcOverlay = null;
+
+            }
+
+        }
+
+        //临时任务区
+        if (lsrwq) {
+
+            if (lsrwqOverlay == null) {
+
+                HeritageScopeTileProvider lsrwqProvider = new HeritageScopeTileProvider(HeritageScopeTileProvider.LSRWQ);
+
+                TileOverlayOptions lsrwqOptions = new TileOverlayOptions().tileProvider(lsrwqProvider);
+
+                lsrwqOptions
+                        .diskCacheDir("/storage/amap/cache")
+                        .diskCacheEnabled(true)
+                        .diskCacheSize(100000);
+
+                lsrwqOverlay = getMap().addTileOverlay(lsrwqOptions);
+
+            }
+
+        } else {
+
+            if (lsrwqOverlay != null) {
+
+                lsrwqOverlay.remove();
+
+                lsrwqOverlay = null;
+
+            }
+
+        }
     }
 
 }

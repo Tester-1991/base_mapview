@@ -287,6 +287,11 @@ public class BaseMapviewPlugin implements MethodCallHandler {
             queryWeatherbyCityAction();
         }
 
+        //显示wms图层
+        else if (call.method.equals("initWms")) {
+            initWmsAction();
+        }
+
         //无消息
         else {
 
@@ -630,5 +635,32 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
         //异步搜索
         mweathersearch.searchWeatherAsyn();
+    }
+
+    /**
+     * 初始化wms图层
+     */
+    private void initWmsAction() {
+
+        //机场净空区
+        boolean airport = (boolean) mapViewOptions.get("airport");
+
+        //禁飞区
+        boolean jfq = (boolean) mapViewOptions.get("jfq");
+
+        //限制区
+        boolean xzq = (boolean) mapViewOptions.get("xzq");
+
+        //危险区
+        boolean wxq = (boolean) mapViewOptions.get("wxq");
+
+        //固定飞场
+        boolean gdfc = (boolean) mapViewOptions.get("gdfc");
+
+        //临时任务区
+        boolean lsrwq = (boolean) mapViewOptions.get("lsrwq");
+
+        mapView.initWms(airport, jfq, xzq, wxq, gdfc, lsrwq);
+
     }
 }

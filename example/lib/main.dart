@@ -3,6 +3,7 @@ import 'package:base_mapview/regeocode_address.dart';
 import 'package:base_mapview/tip.dart';
 import 'package:base_mapview/lat_lng.dart';
 import 'package:flutter/material.dart';
+import 'package:base_mapview/wms.dart';
 import 'package:base_mapview/amap_view.dart';
 
 void main() => runApp(MyApp());
@@ -223,6 +224,19 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     },
                     child: Text(
                       "搜索提示",
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                  RaisedButton(
+                    onPressed: () {
+                      Wms wms = Wms(true, true, true, true, true, true);
+                      AMapView.channel.invokeMethod(
+                        "initWms",
+                        {"mapView": wms.toMap()},
+                      );
+                    },
+                    child: Text(
+                      "添加wms图层",
                       style: TextStyle(color: Colors.red),
                     ),
                   ),
