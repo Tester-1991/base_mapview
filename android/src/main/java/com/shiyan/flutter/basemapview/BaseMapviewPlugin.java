@@ -279,17 +279,23 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
         //输入内容自动提示
         else if (call.method.equals("queryInputeData")) {
+
             queryInputeDataAction();
+
         }
 
         //查询天气信息
         else if (call.method.equals("queryWeatherbyCity")) {
+
             queryWeatherbyCityAction();
+
         }
 
         //显示wms图层
         else if (call.method.equals("initWms")) {
+
             initWmsAction();
+
         }
 
         //无消息
@@ -335,19 +341,24 @@ public class BaseMapviewPlugin implements MethodCallHandler {
      * 显示地图
      */
     private void showMapViewAction() {
-        root.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mapView = createView(id);
+        root.runOnUiThread(() -> {
+            mapView = createView(id);
 
-                mapView.onCreate(new Bundle());
+            mapView.onCreate(new Bundle());
 
-                mapView.onResume();
+            mapView.onResume();
 
-                mapView.init(mapViewOptions, channel);
+            double widthPercent = (double) mapViewOptions.get("widthPercent");
 
-                root.addContentView(mapView, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 1000));
-            }
+            double heightPercent = (double) mapViewOptions.get("heightPercent");
+
+            int mapWidth = (int) (Util.getScreenWidth(root) * widthPercent);
+
+            int mapHeight = (int) (Util.getScreenHeight(root) * heightPercent);
+
+            mapView.init(mapViewOptions, channel,mapWidth,mapHeight);
+
+            root.addContentView(mapView, new FrameLayout.LayoutParams(mapWidth, mapHeight));
         });
     }
 

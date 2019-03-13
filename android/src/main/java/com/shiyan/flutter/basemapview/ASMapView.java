@@ -107,7 +107,7 @@ public class ASMapView extends MapView {
     /**
      * 初始化方法
      */
-    public void init(Map<String, Object> mapViewOptions, final MethodChannel methodChannel) {
+    public void init(Map<String, Object> mapViewOptions, final MethodChannel methodChannel, int mapWidth, int mapHeight) {
         MyLocationStyle myLocationStyle = new MyLocationStyle();
 
         //连续定位、视角不移动到地图中心点
@@ -286,7 +286,7 @@ public class ASMapView extends MapView {
             }
         });
 
-        initScreenMarker();
+        initScreenMarker(mapWidth, mapHeight);
 
         getMap().setOnMarkerClickListener(marker -> {
 
@@ -369,7 +369,7 @@ public class ASMapView extends MapView {
      * 初始化 并添加屏幕中间的marker
      */
     @SuppressLint("CheckResult")
-    public void initScreenMarker() {
+    public void initScreenMarker(int mapWidth, int mapHeight) {
         if (marker == null) {
             post(() -> {
 
@@ -383,9 +383,8 @@ public class ASMapView extends MapView {
 
                 marker = getMap().addMarker(markerOption);
 
-                marker.setPositionByPixels(Util.getScreenWidth(getContext()) / 2
-                        , getTop() + getHeight() / 2);
-
+                marker.setPositionByPixels(mapWidth / 2
+                        , getTop() + mapHeight / 2);
             });
 
         }

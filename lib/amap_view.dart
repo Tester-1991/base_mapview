@@ -61,6 +61,12 @@ class AMapView extends StatefulWidget {
 
   final Wms wms;
 
+  ///宽度百分比
+  final double widthPercent;
+
+  ///高度百分比
+  final double heightPercent;
+
   static Map<String, GlobalKey> map = {};
 
   static int counter = 0;
@@ -141,6 +147,8 @@ class AMapView extends StatefulWidget {
     this.onWeatherLiveSearched,
     this.onMarkerClick,
     this.wms,
+    this.widthPercent,
+    this.heightPercent,
     Key key,
   }) : super(key: key);
 
@@ -150,7 +158,9 @@ class AMapView extends StatefulWidget {
       "centerCoordinate":
           this.centerCoordinate != null ? this.centerCoordinate.toMap() : null,
       "zoomLevel": this.zoomLevel,
-      "wms":this.wms.toMap(),
+      "wms": this.wms.toMap(),
+      "widthPercent": this.widthPercent,
+      "heightPercent": this.heightPercent,
     };
   }
 
@@ -173,9 +183,17 @@ class _AMapViewState extends State<AMapView> {
 
   @override
   Widget build(BuildContext context) {
+    double mapViewHeight = MediaQuery.of(context).size.height;
+    print("mapViewHeight:$mapViewHeight");
+
+    double mapViewWidth = MediaQuery.of(context).size.width;
+    print("mapViewWidth:$mapViewWidth");
+
     return SizedBox(
-      child: Container(),
-      height: 250.0,
+      child: Container(
+      ),
+      height: mapViewHeight * (widget.heightPercent),
+      width: mapViewWidth * (widget.widthPercent),
     );
   }
 }
