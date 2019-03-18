@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/base_mapview.iml" filepath="$PROJECT_DIR$/base_mapview.iml" />
+      <module fileurl="file://$PROJECT_DIR$/android/base_mapview_android.iml" filepath="$PROJECT_DIR$/android/base_mapview_android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/example/android/base_mapview_example_android.iml" filepath="$PROJECT_DIR$/example/android/base_mapview_example_android.iml" />
+    </modules>
+  </component>
+</project>

@@ -55,7 +55,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           centerCoordinate: LatLng(43.99791, 125.397968),
           zoomLevel: 10,
           onLocationChange: (LatLng latlng) {
-            //print(latlng.toString());
+            print(latlng.toString());
           },
           onGetInputtips: (List<Tip> datalist) {
             for (Tip tip in datalist) {
