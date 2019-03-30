@@ -41,7 +41,7 @@ http://lbs.amap.com/api/android-sdk/guide/create-project/get-key
 
 ```
 dependencies:
-  base_mapview: ^0.0.6
+  base_mapview: ^0.0.7
 ```
 
 

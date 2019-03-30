@@ -41,6 +41,4 @@ class Tip {
   String toString() {
     return 'Tip{poiId: $poiId, longitude: $longitude, latitude: $latitude, name: $name, district: $district, adcode: $adcode, address: $address, typeCode: $typeCode}';
   }
-
-
 }

@@ -5,13 +5,16 @@ import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.AMapOptions;
 import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.MapView;
+import com.amap.api.maps.TextureMapView;
 import com.amap.api.maps.UiSettings;
 import com.amap.api.maps.model.BitmapDescriptorFactory;
 import com.amap.api.maps.model.CameraPosition;
@@ -39,6 +42,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
 
 import io.flutter.plugin.common.MethodChannel;
 
@@ -107,7 +111,10 @@ public class ASMapView extends MapView {
     /**
      * 初始化方法
      */
-    public void init(Map<String, Object> mapViewOptions, final MethodChannel methodChannel, int mapWidth, int mapHeight) {
+    public void init(Map<String, Object> mapViewOptions, final MethodChannel methodChannel, int mapWidth, int mapHeight, BaseMapviewPlugin baseMapviewPlugin) {
+
+        final boolean[] isInit = {true};
+
         MyLocationStyle myLocationStyle = new MyLocationStyle();
 
         //连续定位、视角不移动到地图中心点
@@ -155,6 +162,11 @@ public class ASMapView extends MapView {
             public void onMyLocationChange(Location location) {
                 //获取当前经度纬度
                 latLng = new LatLng(location.getLatitude(), location.getLongitude());
+
+                if (isInit[0]) {
+                    baseMapviewPlugin.locationAction();
+                    isInit[0] = false;
+                }
 
                 //回调通知
                 Map<String, Object> map = new HashMap<>();

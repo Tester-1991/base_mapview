@@ -38,6 +38,7 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
+import io.flutter.view.FlutterView;
 
 /**
  * Created by shiyan on 2019/3/6
@@ -47,10 +48,10 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 public class BaseMapviewPlugin implements MethodCallHandler {
 
     //当前Activity环境
-    private FlutterActivity root;
+    private static FlutterActivity root;
 
     //当前地图控件
-    private ASMapView mapView;
+    private static ASMapView mapView;
 
     //地图参数配置
     Map<String, Object> mapViewOptions;
@@ -59,9 +60,9 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
     private static MethodChannel channel;
 
-    private Map<String, ASMapView> map = new ConcurrentHashMap<>();
+    private static Map<String, ASMapView> map = new ConcurrentHashMap<>();
 
-    private String id;
+    private static String id;
 
     /**
      * 创建view
@@ -69,13 +70,9 @@ public class BaseMapviewPlugin implements MethodCallHandler {
      * @param id
      * @return
      */
-    private ASMapView createView(String id) {
+    private static ASMapView createView(String id) {
 
         ASMapView view = new ASMapView(root);
-
-        view.setKey(id);
-
-        map.put(id, view);
 
         return view;
     }
@@ -175,6 +172,9 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
         channel.setMethodCallHandler(new BaseMapviewPlugin((FlutterActivity) registrar.activity()));
 
+        mapView = createView(id);
+
+        ViewRegistrant.registerWith(root, mapView);
     }
 
     /**
@@ -310,7 +310,7 @@ public class BaseMapviewPlugin implements MethodCallHandler {
      * 定位
      */
     @TargetApi(Build.VERSION_CODES.M)
-    private void locationAction() {
+    public void locationAction() {
         if (root.checkSelfPermission((Manifest.permission.ACCESS_COARSE_LOCATION)) == PackageManager.PERMISSION_GRANTED) {
 
             mapView.animateCamera(mapView.getLatLng());
@@ -342,7 +342,10 @@ public class BaseMapviewPlugin implements MethodCallHandler {
      */
     private void showMapViewAction() {
         root.runOnUiThread(() -> {
-            mapView = createView(id);
+
+            mapView.setKey(id);
+
+            map.put(id, mapView);
 
             mapView.onCreate(new Bundle());
 
@@ -356,9 +359,9 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
             int mapHeight = (int) (Util.getScreenHeight(root) * heightPercent);
 
-            mapView.init(mapViewOptions, channel,mapWidth,mapHeight);
+            mapView.init(mapViewOptions, channel, mapWidth, mapHeight, this);
 
-            root.addContentView(mapView, new FrameLayout.LayoutParams(mapWidth, mapHeight));
+            //root.addContentView(mapView, new FrameLayout.LayoutParams(mapWidth, mapHeight));
         });
     }
 

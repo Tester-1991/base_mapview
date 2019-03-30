@@ -1,5 +1,5 @@
 ///wms配置类
-class Wms{
+class Wms {
   final bool airport;
 
   final bool jfq;

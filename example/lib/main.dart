@@ -85,7 +85,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             print("marker click:" + latlng.toString());
           },
           wms: _wms,
-          widthPercent: 0.6,
+          widthPercent: 1.0,
           heightPercent: 0.8,
         ),
         Wrap(

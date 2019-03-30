@@ -156,9 +156,9 @@ class AMapView extends StatefulWidget {
     return {
       "mapType": this.mapType.index,
       "centerCoordinate":
-          this.centerCoordinate != null ? this.centerCoordinate.toMap() : null,
+      this.centerCoordinate != null ? this.centerCoordinate.toMap() : null,
       "zoomLevel": this.zoomLevel,
-      "wms": this.wms.toMap(),
+      "wms": this.wms?.toMap(),
       "widthPercent": this.widthPercent,
       "heightPercent": this.heightPercent,
     };
@@ -174,24 +174,33 @@ class AMapView extends StatefulWidget {
 class _AMapViewState extends State<AMapView> {
   @override
   void initState() {
-    ///加载地图
-    AMapView.channel.invokeMethod("showMapView",
-        {"mapView": widget.toMap(), "id": widget.key.toString()});
-
     super.initState();
+
+    WidgetsBinding widgetsBinding = WidgetsBinding.instance;
+
+    widgetsBinding.addPostFrameCallback((_) {
+      ///加载地图
+      AMapView.channel.invokeMethod("showMapView",
+          {"mapView": widget.toMap(), "id": widget.key.toString()});
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    double mapViewHeight = MediaQuery.of(context).size.height;
+    double mapViewHeight = MediaQuery
+        .of(context)
+        .size
+        .height;
     print("mapViewHeight:$mapViewHeight");
 
-    double mapViewWidth = MediaQuery.of(context).size.width;
+    double mapViewWidth = MediaQuery
+        .of(context)
+        .size
+        .width;
     print("mapViewWidth:$mapViewWidth");
 
     return SizedBox(
-      child: Container(
-      ),
+      child: AndroidView(viewType: "MapView"),
       height: mapViewHeight * (widget.heightPercent),
       width: mapViewWidth * (widget.widthPercent),
     );
