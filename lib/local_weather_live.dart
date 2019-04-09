@@ -30,6 +30,10 @@ class LocalWeatherLive {
       this.windPower);
 
   static LocalWeatherLive fromMap(Map map) {
+    if (map["temperature"] == "") {
+      return LocalWeatherLive(map[""], map[""], map[""], map[""], map[""],
+          map[""], map[""], map[""], map[""]);
+    }
     return LocalWeatherLive(
         map["adCode"],
         map["city"],

@@ -95,6 +95,9 @@ public class ASMapView extends MapView {
     //临时任务区图层
     private TileOverlay lsrwqOverlay;
 
+    //临时禁飞区
+    private TileOverlay lsjfqOverlay;
+
 
     public ASMapView(Context context) {
         super(context);
@@ -257,7 +260,10 @@ public class ASMapView extends MapView {
 
                 if (rCode == AMapException.CODE_AMAP_SUCCESS) {
                     if (TextUtils.isEmpty(regeocodeAddress.getProvince())) {
-
+                        HashMap<String, Object> map = new HashMap<>();
+                        map.put("id", key);
+                        map.put("province", "");
+                        methodChannel.invokeMethod("regeocodeSearched", map);
                         return;
                     }
 
@@ -343,7 +349,10 @@ public class ASMapView extends MapView {
                 //临时任务区
                 boolean lsrwq = (boolean) wmsMap.get("lsrwq");
 
-                initWms(airport, jfq, xzq, wxq, gdfc, lsrwq);
+                //临时禁飞区
+                boolean lsjfq = (boolean) wmsMap.get("lsjfq");
+
+                initWms(airport, jfq, xzq, wxq, gdfc, lsrwq,lsjfq);
 
             }
         }
@@ -572,7 +581,7 @@ public class ASMapView extends MapView {
     /**
      * 显示禁飞区图层
      */
-    public void initWms(boolean airport, boolean jfq, boolean xzq, boolean wxq, boolean gdfc, boolean lsrwq) {
+    public void initWms(boolean airport, boolean jfq, boolean xzq, boolean wxq, boolean gdfc, boolean lsrwq,boolean lsjfq) {
         //机场净空区
         if (airport) {
 
@@ -744,6 +753,36 @@ public class ASMapView extends MapView {
                 lsrwqOverlay.remove();
 
                 lsrwqOverlay = null;
+
+            }
+
+        }
+
+        //临时禁飞区
+        if (lsjfq) {
+
+            if (lsjfqOverlay == null) {
+
+                HeritageScopeTileProvider lsjfqProvider = new HeritageScopeTileProvider(HeritageScopeTileProvider.LSJFQ);
+
+                TileOverlayOptions lsjfqOptions = new TileOverlayOptions().tileProvider(lsjfqProvider);
+
+                lsjfqOptions
+                        .diskCacheDir("/storage/amap/cache")
+                        .diskCacheEnabled(true)
+                        .diskCacheSize(100000);
+
+                lsjfqOverlay = getMap().addTileOverlay(lsjfqOptions);
+
+            }
+
+        } else {
+
+            if (lsjfqOverlay != null) {
+
+                lsjfqOverlay.remove();
+
+                lsjfqOverlay = null;
 
             }
 

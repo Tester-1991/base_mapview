@@ -94,7 +94,6 @@ class AMapView extends StatefulWidget {
 
     Map args = call.arguments;
     String id = args["id"];
-    print("$id $args");
     GlobalKey key = map[id];
     if (key != null) {
       view = key.currentWidget;

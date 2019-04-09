@@ -1,5 +1,7 @@
 package com.shiyan.flutter.basemapview;
 
+import android.util.Log;
+
 import com.amap.api.maps.model.UrlTileProvider;
 
 import java.net.MalformedURLException;
@@ -45,24 +47,45 @@ public class HeritageScopeTileProvider extends UrlTileProvider {
 
     public static final int WXQ = 6;
 
-    public static final String wmsBaseUrl = "http://map-api.airspace.cn/";
+    public static final int LSJFQ = 4;
+
+    //public static final String wmsBaseUrl = "http://map-api.airspace.cn/";
+
+    public static final String wmsBaseUrl = "http://map-api-test.airspace.cn/";
 
     public HeritageScopeTileProvider(int i) {
         super(titleSize, titleSize);
 
+        //临时任务区
+        String lsrwqUrl = "geoserver/airspace/wms?layers=airspace:airspace&FORMAT=image/png&TRANSPARENT=TRUE&SERVICE=WMS&version=1.1.0&request=GetMap&STYLES=&SRS=EPSG:3857&tiled=true&cql_filter=type='TEMPORARY' AND used = true AND '%s' <= end_time AND '%s' >= start_time&BBOX=";
+
+        String dateWithSecond = DateUtils.getyyyyMMDD();
+
+        String date = DateUtils.getHHmmssDate();
+
+        String otherUrl = "geoserver/airspace/wms?layers=airspace:airspace&FORMAT=image/png&TRANSPARENT=TRUE&SERVICE=WMS&version=1.1.0&request=GetMap&STYLES=&SRS=EPSG:3857&tiled=true&cql_filter=type='%s' AND used=true&BBOX=";
+
+        String dangerUrl = "geoserver/airspace/wms?layers=airspace:airspace&FORMAT=image/png&TRANSPARENT=TRUE&SERVICE=WMS&version=1.1.0&request=GetMap&STYLES=&SRS=EPSG:3857&tiled=true&cql_filter=type='DANGER_AREA' AND used=true AND ((morrow = false AND '%s' >= start_time_of_day AND '%s' <= end_time_of_day ) OR ( morrow = true AND '%s' >= start_time_of_day ) OR ( morrow = true AND '%s' <= end_time_of_day))&BBOX=";
+
+        String lsjfqUrl = "geoserver/airspace/wms?layers=airspace:airspace&FORMAT=image/png&TRANSPARENT=TRUE&SERVICE=WMS&version=1.1.0&request=GetMap&STYLES=&SRS=EPSG:3857&tiled=true&cql_filter=type='TEMPORARY_NO_FLY' AND used=true AND '%s' <= end_time AND '%s' >= start_time AND ((morrow = false AND '%s' >= start_time_of_day AND '%s' <= end_time_of_day ) OR ( morrow = true AND '%s' >= start_time_of_day ) OR ( morrow = true AND '%s' <= end_time_of_day))&BBOX=";
+
         //地址写你自己的wms地址
         if (i == 0)      //机场
-            mRootUrl = wmsBaseUrl + "geoserver/airspace/wms?layers=airspace:airspace&FORMAT=image/png&TRANSPARENT=TRUE&SERVICE=WMS&version=1.1.0&request=GetMap&STYLES=&SRS=EPSG:3857&tiled=true&cql_filter=TYPE==0&BBOX=";
+            mRootUrl = wmsBaseUrl + String.format(otherUrl, "AIRPORT");
         else if (i == 3) //禁飞区
-            mRootUrl = wmsBaseUrl + "geoserver/airspace/wms?layers=airspace:airspace&FORMAT=image/png&TRANSPARENT=TRUE&SERVICE=WMS&version=1.1.0&request=GetMap&STYLES=&SRS=EPSG:3857&tiled=true&cql_filter=TYPE==3&BBOX=";
+            mRootUrl = wmsBaseUrl + String.format(otherUrl, "NO_FLY");
         else if (i == 5)   //限制区
-            mRootUrl = wmsBaseUrl + "geoserver/airspace/wms?layers=airspace:airspace&FORMAT=image/png&TRANSPARENT=TRUE&SERVICE=WMS&version=1.1.0&request=GetMap&STYLES=&SRS=EPSG:3857&tiled=true&cql_filter=TYPE==5&BBOX=";
+            mRootUrl = wmsBaseUrl + String.format(otherUrl, "RESTRICTED_AREA");
         else if (i == 6)  //危险区
-            mRootUrl = wmsBaseUrl + "geoserver/airspace/wms?layers=airspace:airspace&FORMAT=image/png&TRANSPARENT=TRUE&SERVICE=WMS&version=1.1.0&request=GetMap&STYLES=&SRS=EPSG:3857&tiled=true&cql_filter=TYPE==6&BBOX=";
+            mRootUrl = wmsBaseUrl + String.format(dangerUrl, date, date, date, date);
         else if (i == 1) //固定飞场
-            mRootUrl = wmsBaseUrl + "geoserver/airspace/wms?layers=airspace:airspace&FORMAT=image/png&TRANSPARENT=TRUE&SERVICE=WMS&version=1.1.0&request=GetMap&STYLES=&SRS=EPSG:3857&tiled=true&cql_filter=TYPE==1&BBOX=";
+            mRootUrl = wmsBaseUrl + String.format(otherUrl, "LONGTERM");
         else if (i == 2) //临时任务区
-            mRootUrl = wmsBaseUrl + "geoserver/airspace/wms?layers=airspace:airspace&FORMAT=image/png&TRANSPARENT=TRUE&SERVICE=WMS&version=1.1.0&request=GetMap&STYLES=&SRS=EPSG:3857&tiled=true&cql_filter=TYPE==2&BBOX=";
+            mRootUrl = wmsBaseUrl + String.format(lsrwqUrl, dateWithSecond, dateWithSecond);
+        else if (i == 4)  //临时禁飞区
+            mRootUrl = wmsBaseUrl + String.format(lsjfqUrl, dateWithSecond, dateWithSecond, date, date,date,date);
+        mRootUrl = mRootUrl.replaceAll(" ", "%20").replaceAll("'", "%27");
+
     }
 
     @Override

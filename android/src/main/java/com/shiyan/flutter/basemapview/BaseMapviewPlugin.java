@@ -298,6 +298,13 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
         }
 
+        //定位到具体位置
+        else if (call.method.equals("location_address")) {
+
+            locationAddressAction();
+
+        }
+
         //无消息
         else {
 
@@ -632,10 +639,28 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
                     } else {
 
+                        HashMap<String, Object> map = new HashMap<>();
+
+                        map.put("id", id);
+
+                        map.put("temperature", "");
+
+                        map.put("weather", "");
+
+                        channel.invokeMethod("weatherLiveSearched", map);
                     }
 
                 } else {
 
+                    HashMap<String, Object> map = new HashMap<>();
+
+                    map.put("id", id);
+
+                    map.put("temperature", "");
+
+                    map.put("weather", "");
+
+                    channel.invokeMethod("weatherLiveSearched", map);
                 }
             }
 
@@ -674,7 +699,44 @@ public class BaseMapviewPlugin implements MethodCallHandler {
         //临时任务区
         boolean lsrwq = (boolean) mapViewOptions.get("lsrwq");
 
-        mapView.initWms(airport, jfq, xzq, wxq, gdfc, lsrwq);
+        //临时禁飞区
+        boolean lsjfq = (boolean) mapViewOptions.get("lsjfq");
 
+        mapView.initWms(airport, jfq, xzq, wxq, gdfc, lsrwq,lsjfq);
+
+    }
+
+    /**
+     * 定位到具体位置
+     */
+    public void locationAddressAction() {
+        //获取经度
+        String longitude = (String) mapViewOptions.get("longitude");
+        //获取纬度
+        String latitude = (String) mapViewOptions.get("latitude");
+
+        LatLng latLng = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (root.checkSelfPermission((Manifest.permission.ACCESS_COARSE_LOCATION)) == PackageManager.PERMISSION_GRANTED) {
+
+                mapView.animateCamera(latLng);
+
+            } else {
+                Acp.getInstance(root).request(new AcpOptions.Builder()
+                                .setPermissions(Manifest.permission.ACCESS_COARSE_LOCATION)
+                                .build(),
+                        new AcpListener() {
+                            @Override
+                            public void onGranted() {
+                                mapView.animateCamera(latLng);
+                            }
+
+                            @Override
+                            public void onDenied(List<String> permissions) {
+                            }
+                        });
+            }
+        }
     }
 }

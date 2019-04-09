@@ -34,7 +34,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     LatLng(39.823083, 116.294776).toMap(),
   ];
 
-  Wms _wms = Wms(true, true, true, true, true, true);
+  Wms _wms = Wms(true, true, true, true, true, true,true);
 
   Key _key0;
 
@@ -229,7 +229,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             ),
             RaisedButton(
               onPressed: () {
-                Wms wms = Wms(true, true, true, true, true, true);
+                Wms wms = Wms(true, true, true, true, true, true,true);
                 AMapView.channel.invokeMethod(
                   "initWms",
                   {"mapView": wms.toMap()},

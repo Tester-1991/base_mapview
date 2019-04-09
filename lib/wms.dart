@@ -12,11 +12,14 @@ class Wms {
 
   final bool lsrwq;
 
-  Wms(this.airport, this.jfq, this.xzq, this.wxq, this.gdfc, this.lsrwq);
+  final bool lsjfq;
+
+  Wms(this.airport, this.jfq, this.xzq, this.wxq, this.gdfc, this.lsrwq,
+      this.lsjfq);
 
   static Wms fromMap(Map map) {
     return Wms(map["airport"], map["jfq"], map["xzq"], map["wxq"], map["gdfc"],
-        map["lsrwq"]);
+        map["lsrwq"], map["lsjfq"]);
   }
 
   Map toMap() {
@@ -27,11 +30,12 @@ class Wms {
       "wxq": this.wxq,
       "gdfc": this.gdfc,
       "lsrwq": this.lsrwq,
+      "lsjfq": this.lsjfq,
     };
   }
 
   @override
   String toString() {
-    return 'Wms{airport: $airport, jfq: $jfq, xzq: $xzq, wxq: $wxq, gdfc: $gdfc, lsrwq: $lsrwq}';
+    return 'Wms{airport: $airport, jfq: $jfq, xzq: $xzq, wxq: $wxq, gdfc: $gdfc, lsrwq: $lsrwq,lsjfq: $lsjfq}';
   }
 }

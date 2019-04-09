@@ -10,6 +10,9 @@ class RegeocodeAddress {
   RegeocodeAddress(this.province, this.city, this.district, this.township);
 
   static RegeocodeAddress fromMap(Map map) {
+    if (map["province"] == "") {
+      return RegeocodeAddress(map["province"], null, null, null);
+    }
     return RegeocodeAddress(
         map["province"], map["city"], map["district"], map["township"]);
   }
