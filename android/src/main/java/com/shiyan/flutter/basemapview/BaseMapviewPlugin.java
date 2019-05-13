@@ -9,9 +9,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.services.help.Inputtips;
@@ -37,7 +39,9 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
+import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
+import io.flutter.plugin.common.StandardMessageCodec;
 import io.flutter.view.FlutterView;
 
 /**
@@ -63,6 +67,8 @@ public class BaseMapviewPlugin implements MethodCallHandler {
     private static Map<String, ASMapView> map = new ConcurrentHashMap<>();
 
     private static String id;
+
+    static PluginRegistry.Registrar registrar;
 
     /**
      * 创建view
@@ -161,12 +167,16 @@ public class BaseMapviewPlugin implements MethodCallHandler {
                 });
     }
 
+    static boolean isFirst = true;
+
     /**
      * 插件注册
      *
      * @param registrar
      */
     public static void registerWith(Registrar registrar) {
+
+        Log.e("plugin", "registerWith");
 
         channel = new MethodChannel(registrar.messenger(), "flutter_amap");
 
@@ -200,6 +210,15 @@ public class BaseMapviewPlugin implements MethodCallHandler {
             }
         }
 
+        //处理多个mapview
+        if (args != null && args.containsKey("id")) {
+            id = (String) args.get("id");
+            Log.e("plugin", "id");
+            if (getView(id) != null) {
+                mapView = getView(id);
+            }
+        }
+
         //显示地图
         if (call.method.equals("showMapView")) {
 
@@ -210,13 +229,15 @@ public class BaseMapviewPlugin implements MethodCallHandler {
         //移除
         if (call.method.equals("remove")) {
 
-            removeKeyAction();
+//            ViewGroup viewGroup = (ViewGroup) mapView.getParent();
+//
+//            viewGroup.removeView(mapView);
 
         }
 
         //定位
         else if (call.method.equals("location")) {
-
+            Log.e("plugin", "location");
             locationAction();
 
         }
@@ -246,6 +267,20 @@ public class BaseMapviewPlugin implements MethodCallHandler {
         else if (call.method.equals("drawpolylin")) {
 
             drawPolylinAction();
+
+        }
+
+        //绘制飞行轨迹
+        else if (call.method.equals("drawflypolylin")) {
+
+            drawFlyPolylinAction();
+
+        }
+
+        //缩放
+         else if (call.method.equals("animateCamera")) {
+
+            animateCameraAction();
 
         }
 
@@ -303,6 +338,17 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
             locationAddressAction();
 
+        } else if (call.method.equals("register")) {
+
+            mapView = new ASMapView(root);
+
+            if (args != null && args.containsKey("viewType")) {
+
+                String viewType = (String) args.get("viewType");
+
+                registrar.platformViewRegistry().registerViewFactory(viewType, new BMapViewFactory(new StandardMessageCodec(), mapView));
+            }
+
         }
 
         //无消息
@@ -312,6 +358,7 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
         }
     }
+
 
     /**
      * 定位
@@ -348,6 +395,9 @@ public class BaseMapviewPlugin implements MethodCallHandler {
      * 显示地图
      */
     private void showMapViewAction() {
+        if (registrar != null && !isFirst) {
+            Log.e("plugin", "showMapViewAction:" + id);
+        }
         root.runOnUiThread(() -> {
 
             mapView.setKey(id);
@@ -368,6 +418,7 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
             mapView.init(mapViewOptions, channel, mapWidth, mapHeight, this);
 
+            isFirst = false;
             //root.addContentView(mapView, new FrameLayout.LayoutParams(mapWidth, mapHeight));
         });
     }
@@ -475,6 +526,47 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
         mapView.drawPolylin(latlngList);
 
+    }
+
+    /**
+     * 绘制飞行轨迹
+     */
+    private void drawFlyPolylinAction() {
+
+        List<LatLng> latlngList = new ArrayList<>();
+
+        List<Map<String, Object>> list = (List) mapViewOptions.get("polylinlist");
+
+        for (Map<String, Object> map : list) {
+
+            LatLng lantLng = new LatLng((double) map.get("latitude"), (double) map.get("longitude"));
+
+            lantLng = Util.getGdLatlngFormat(String.valueOf(lantLng.latitude), String.valueOf(lantLng.longitude), root);
+
+            latlngList.add(lantLng);
+        }
+
+        mapView.drawFlyPolylin(latlngList);
+    }
+
+    /**
+     * 缩放
+     */
+    private void animateCameraAction() {
+        List<LatLng> latlngList = new ArrayList<>();
+
+        List<Map<String, Object>> list = (List) mapViewOptions.get("polylinlist");
+
+        for (Map<String, Object> map : list) {
+
+            LatLng lantLng = new LatLng((double) map.get("latitude"), (double) map.get("longitude"));
+
+            lantLng = Util.getGdLatlngFormat(String.valueOf(lantLng.latitude), String.valueOf(lantLng.longitude), root);
+
+            latlngList.add(lantLng);
+        }
+
+        mapView.animateCamera(latlngList);
     }
 
     /**
@@ -702,7 +794,7 @@ public class BaseMapviewPlugin implements MethodCallHandler {
         //临时禁飞区
         boolean lsjfq = (boolean) mapViewOptions.get("lsjfq");
 
-        mapView.initWms(airport, jfq, xzq, wxq, gdfc, lsrwq,lsjfq);
+        mapView.initWms(airport, jfq, xzq, wxq, gdfc, lsrwq, lsjfq);
 
     }
 
