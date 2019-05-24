@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.zhy.autolayout.AutoLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rootview"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="#0000"
+    android:orientation="vertical">
+
+    <com.zhy.autolayout.AutoLinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@mipmap/info_back"
+        android:orientation="vertical"
+        android:paddingLeft="15px"
+        android:paddingTop="10px"
+        android:paddingRight="15px"
+        android:paddingBottom="10px">
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#ffffff"
+            android:textSize="10sp"></TextView>
+
+        <TextView
+            android:gravity="center"
+            android:id="@+id/tv_to_detail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="查看详情"
+            android:drawableRight="@mipmap/toplanedetail"
+            android:textColor="#ffffff"
+            android:textSize="10sp" />
+
+    </com.zhy.autolayout.AutoLinearLayout>
+
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:src="@mipmap/info_sj"></ImageView>
+
+</com.zhy.autolayout.AutoLinearLayout>
+
+

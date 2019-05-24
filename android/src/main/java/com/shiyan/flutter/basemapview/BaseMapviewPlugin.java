@@ -52,10 +52,10 @@ import io.flutter.view.FlutterView;
 public class BaseMapviewPlugin implements MethodCallHandler {
 
     //当前Activity环境
-    private static FlutterActivity root;
+    public static FlutterActivity root;
 
     //当前地图控件
-    private static ASMapView mapView;
+    public static ASMapView mapView;
 
     //地图参数配置
     Map<String, Object> mapViewOptions;
@@ -249,6 +249,20 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
         }
 
+        //添加查找设备marker
+        else if (call.method.equals("add_find_device_marker")) {
+
+            addFindDeviceMarkerAction(result);
+
+        }
+
+        //添加空域详情marker
+        else if (call.method.equals("add_area_detail_marker")) {
+
+            addAreaDetailMarkerAction();
+
+        }
+
         //移除marker
         else if (call.method.equals("removemarker")) {
 
@@ -277,11 +291,22 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
         }
 
+        //清除飞行轨迹
+        else if (call.method.equals("clearflypolylin")) {
+            clearFlyPolylinAction();
+        }
+
         //缩放
-         else if (call.method.equals("animateCamera")) {
+        else if (call.method.equals("animateCamera")) {
 
             animateCameraAction();
 
+        }
+
+        //空域详情缩放
+        else if (call.method.equals("areaAnimateCamera")) {
+
+            areaAnimateCameraAction();
         }
 
         //绘制多边形
@@ -338,7 +363,10 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
             locationAddressAction();
 
-        } else if (call.method.equals("register")) {
+        }
+
+        //注册
+        else if (call.method.equals("register")) {
 
             mapView = new ASMapView(root);
 
@@ -367,7 +395,7 @@ public class BaseMapviewPlugin implements MethodCallHandler {
     public void locationAction() {
         if (root.checkSelfPermission((Manifest.permission.ACCESS_COARSE_LOCATION)) == PackageManager.PERMISSION_GRANTED) {
 
-            mapView.animateCamera(mapView.getLatLng());
+            mapView.animateCamera(mapView.getLatLng(), "17.6");
 
         } else {
             Acp.getInstance(root).request(new AcpOptions.Builder()
@@ -379,7 +407,7 @@ public class BaseMapviewPlugin implements MethodCallHandler {
                             new Handler().postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mapView.animateCamera(mapView.getLatLng());
+                                    mapView.animateCamera(mapView.getLatLng(), "17.6");
                                 }
                             }, 2000);
                         }
@@ -412,11 +440,15 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
             double heightPercent = (double) mapViewOptions.get("heightPercent");
 
+            boolean showCenterIcon = (boolean) mapViewOptions.get("showCenterIcon");
+
+            boolean openFirstLocation = (boolean) mapViewOptions.get("openFirstLocation");
+
             int mapWidth = (int) (Util.getScreenWidth(root) * widthPercent);
 
             int mapHeight = (int) (Util.getScreenHeight(root) * heightPercent);
 
-            mapView.init(mapViewOptions, channel, mapWidth, mapHeight, this);
+            mapView.init(mapViewOptions, channel, mapWidth, mapHeight, this, showCenterIcon, openFirstLocation);
 
             isFirst = false;
             //root.addContentView(mapView, new FrameLayout.LayoutParams(mapWidth, mapHeight));
@@ -489,6 +521,45 @@ public class BaseMapviewPlugin implements MethodCallHandler {
     }
 
     /**
+     * 添加查找设备marker
+     *
+     * @param result
+     */
+    private void addFindDeviceMarkerAction(Result result) {
+
+        List<LatLng> latlngList = new ArrayList<>();
+
+        List<Map<String, Object>> list = (List) mapViewOptions.get("markerlist");
+
+        for (Map<String, Object> map : list) {
+
+            LatLng lantLng = new LatLng((double) map.get("latitude"), (double) map.get("longitude"));
+
+            latlngList.add(lantLng);
+        }
+
+        mapView.addFindDeviceMarker(latlngList, result);
+    }
+
+    /**
+     * 添加空域详情marker
+     */
+    private void addAreaDetailMarkerAction() {
+        List<LatLng> latlngList = new ArrayList<>();
+
+        List<Map<String, Object>> list = (List) mapViewOptions.get("markerlist");
+
+        for (Map<String, Object> map : list) {
+
+            LatLng lantLng = new LatLng((double) map.get("latitude"), (double) map.get("longitude"));
+
+            latlngList.add(lantLng);
+        }
+
+        mapView.addAreaDetailMarker(latlngList);
+    }
+
+    /**
      * 移除marker标记
      */
     private void removeMarkerAction() {
@@ -504,7 +575,7 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
         Map<String, Object> roundcenterMap = (Map<String, Object>) mapViewOptions.get("roundcenter");
 
-        mapView.drawCircle(new LatLng((double) roundcenterMap.get("latitude"), (double) roundcenterMap.get("longitude")), (Double) mapViewOptions.get("radius"));
+        mapView.drawCircle(new LatLng((double) roundcenterMap.get("latitude"), (double) roundcenterMap.get("longitude")), (Double) mapViewOptions.get("radius"), (String) mapViewOptions.get("color"));
 
     }
 
@@ -517,6 +588,8 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
         List<Map<String, Object>> list = (List) mapViewOptions.get("polylinlist");
 
+        String color = (String) mapViewOptions.get("color");
+
         for (Map<String, Object> map : list) {
 
             LatLng lantLng = new LatLng((double) map.get("latitude"), (double) map.get("longitude"));
@@ -524,7 +597,7 @@ public class BaseMapviewPlugin implements MethodCallHandler {
             latlngList.add(lantLng);
         }
 
-        mapView.drawPolylin(latlngList);
+        mapView.drawPolylin(latlngList, color);
 
     }
 
@@ -550,6 +623,13 @@ public class BaseMapviewPlugin implements MethodCallHandler {
     }
 
     /**
+     * 清除飞行轨迹
+     */
+    private void clearFlyPolylinAction() {
+        mapView.clearFlyPolylin();
+    }
+
+    /**
      * 缩放
      */
     private void animateCameraAction() {
@@ -570,6 +650,56 @@ public class BaseMapviewPlugin implements MethodCallHandler {
     }
 
     /**
+     * 空域详情缩放
+     */
+    private void areaAnimateCameraAction() {
+
+        boolean includeSelf = false;
+
+        List<Map<String, Object>> list = null;
+
+        String areaType = "";
+
+
+        if (mapViewOptions.containsKey("list")) {
+            list = (List) mapViewOptions.get("list");
+        }
+
+        if (mapViewOptions.containsKey("includeSelf")) {
+            includeSelf = (boolean) mapViewOptions.get("includeSelf");
+        }
+
+        if (mapViewOptions.containsKey("areaType")) {
+            areaType = (String) mapViewOptions.get("areaType");
+        }
+
+        double radius = (double) mapViewOptions.get("radius");
+
+        boolean first = (boolean) mapViewOptions.get("first");
+
+        Map<String, Object> roundcenterMap = (Map<String, Object>) mapViewOptions.get("roundcenter");
+
+        double latitude = (double) roundcenterMap.get("latitude");
+
+        double longitude = (double) roundcenterMap.get("longitude");
+
+        List<LatLng> latlngList = new ArrayList<>();
+
+        if (list != null) {
+            for (Map<String, Object> map : list) {
+
+                LatLng lantLng = new LatLng((double) map.get("latitude"), (double) map.get("longitude"));
+
+                //lantLng = Util.getGdLatlngFormat(String.valueOf(lantLng.latitude), String.valueOf(lantLng.longitude), root);
+
+                latlngList.add(lantLng);
+            }
+        }
+
+        mapView.areaScaleCamera(latlngList, includeSelf, areaType, radius, latitude, longitude, first);
+    }
+
+    /**
      * 绘制多边形
      */
     private void drawPolygonAction() {
@@ -578,6 +708,8 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
         List<Map<String, Object>> list = (List) mapViewOptions.get("polygonlist");
 
+        String color = (String) mapViewOptions.get("color");
+
         for (Map<String, Object> map : list) {
 
             LatLng lantLng = new LatLng((double) map.get("latitude"), (double) map.get("longitude"));
@@ -585,7 +717,7 @@ public class BaseMapviewPlugin implements MethodCallHandler {
             latlngList.add(lantLng);
         }
 
-        mapView.drawPolygon(latlngList);
+        mapView.drawPolygon(latlngList, color);
     }
 
     /**
@@ -804,15 +936,30 @@ public class BaseMapviewPlugin implements MethodCallHandler {
     public void locationAddressAction() {
         //获取经度
         String longitude = (String) mapViewOptions.get("longitude");
+        Log.e("plugin","longitude:"+longitude);
         //获取纬度
         String latitude = (String) mapViewOptions.get("latitude");
+        Log.e("plugin","latitude:"+latitude);
 
-        LatLng latLng = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
+        String v = (String) mapViewOptions.get("v");
+
+        int type = (int) mapViewOptions.get("type");
+
+        Log.e("plugin","type:"+type);
+
+        LatLng latLng = Util.getGdLatlngFormat(latitude, longitude, root);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (root.checkSelfPermission((Manifest.permission.ACCESS_COARSE_LOCATION)) == PackageManager.PERMISSION_GRANTED) {
 
-                mapView.animateCamera(latLng);
+                switch (type) {
+                    case 1:
+                        mapView.animateCamera(latLng, v);
+                        break;
+                    case 2:
+                        mapView.animateUpdateCamera(latLng, v);
+                        break;
+                }
 
             } else {
                 Acp.getInstance(root).request(new AcpOptions.Builder()
@@ -821,7 +968,14 @@ public class BaseMapviewPlugin implements MethodCallHandler {
                         new AcpListener() {
                             @Override
                             public void onGranted() {
-                                mapView.animateCamera(latLng);
+                                switch (type) {
+                                    case 1:
+                                        mapView.animateCamera(latLng, v);
+                                        break;
+                                    case 2:
+                                        mapView.animateUpdateCamera(latLng, v);
+                                        break;
+                                }
                             }
 
                             @Override

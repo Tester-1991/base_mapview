@@ -61,6 +61,12 @@ class AMapView extends StatefulWidget {
 
   final Wms wms;
 
+  final String viewType;
+
+  final bool showCenterIcon;
+
+  final bool openFirstLocation;
+
   ///宽度百分比
   final double widthPercent;
 
@@ -148,6 +154,9 @@ class AMapView extends StatefulWidget {
     this.wms,
     this.widthPercent,
     this.heightPercent,
+    this.viewType,
+    this.showCenterIcon: true,
+    this.openFirstLocation:true,
     Key key,
   }) : super(key: key);
 
@@ -160,6 +169,9 @@ class AMapView extends StatefulWidget {
       "wms": this.wms?.toMap(),
       "widthPercent": this.widthPercent,
       "heightPercent": this.heightPercent,
+      "viewType": this.viewType,
+      "showCenterIcon": this.showCenterIcon,
+      "openFirstLocation": this.openFirstLocation,
     };
   }
 
@@ -199,7 +211,7 @@ class _AMapViewState extends State<AMapView> {
     print("mapViewWidth:$mapViewWidth");
 
     return SizedBox(
-      child: AndroidView(viewType: "MapView"),
+      child: AndroidView(viewType: widget.viewType),
       height: mapViewHeight * (widget.heightPercent),
       width: mapViewWidth * (widget.widthPercent),
     );

@@ -15,12 +15,16 @@ import com.amap.api.maps.AMapOptions;
 import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.TextureMapView;
+
+import io.flutter.plugin.common.MethodChannel.Result;
+
 import com.amap.api.maps.UiSettings;
 import com.amap.api.maps.model.BitmapDescriptorFactory;
 import com.amap.api.maps.model.CameraPosition;
 import com.amap.api.maps.model.Circle;
 import com.amap.api.maps.model.CircleOptions;
 import com.amap.api.maps.model.LatLng;
+import com.amap.api.maps.model.LatLngBounds;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.MyLocationStyle;
@@ -98,6 +102,16 @@ public class ASMapView extends MapView {
     //临时禁飞区
     private TileOverlay lsjfqOverlay;
 
+    private boolean isLocationInit = true;
+
+    private final double originShift = 20037508.34278924;//2*Math.PI*6378137/2.0; 周长的一半
+
+    private final double DEGREE_PER_METER = 180.0 / originShift;//一米多少度
+
+    private final double HALF_PI = Math.PI / 2.0;
+
+    private final double RAD_PER_DEGREE = Math.PI / 180.0;
+
 
     public ASMapView(Context context) {
         super(context);
@@ -114,9 +128,11 @@ public class ASMapView extends MapView {
     /**
      * 初始化方法
      */
-    public void init(Map<String, Object> mapViewOptions, final MethodChannel methodChannel, int mapWidth, int mapHeight, BaseMapviewPlugin baseMapviewPlugin) {
+    public void init(Map<String, Object> mapViewOptions, final MethodChannel methodChannel, int mapWidth, int mapHeight, BaseMapviewPlugin baseMapviewPlugin, boolean showCenterIcon, boolean openFirstLocation) {
 
-        final boolean[] isInit = {true};
+        isLocationInit = openFirstLocation;
+
+        boolean[] isInit = {isLocationInit};
 
         MyLocationStyle myLocationStyle = new MyLocationStyle();
 
@@ -222,7 +238,9 @@ public class ASMapView extends MapView {
 
             int mapType = (int) mapViewOptions.get("mapType");
 
-            setMapType(mapType);
+            Log.e("plugin", "mapType:" + mapType);
+
+            setMapType(mapType + 1);
         }
 
         //中心点设置
@@ -232,7 +250,7 @@ public class ASMapView extends MapView {
 
             if (coordinateMap != null) {
 
-                animateCamera(new LatLng((double) coordinateMap.get("latitude"), (double) coordinateMap.get("longitude")));
+                animateCamera(new LatLng((double) coordinateMap.get("latitude"), (double) coordinateMap.get("longitude")), "17.6");
 
             }
         }
@@ -304,7 +322,9 @@ public class ASMapView extends MapView {
             }
         });
 
-        initScreenMarker(mapWidth, mapHeight);
+        if (showCenterIcon) {
+            initScreenMarker(mapWidth, mapHeight);
+        }
 
         getMap().setOnMarkerClickListener(marker -> {
 
@@ -322,8 +342,20 @@ public class ASMapView extends MapView {
 
             methodChannel.invokeMethod("markerClick", map);
 
+            Log.e("地图测试", "onMarkerClick");
+            if (marker.isInfoWindowShown()) {
+
+                marker.hideInfoWindow();
+
+            } else {
+
+                marker.showInfoWindow();
+
+            }
             return true;
         });
+
+        getMap().setInfoWindowAdapter(new InfoWinAdapter());
 
         //设置是否显示wms图层
         if (mapViewOptions.containsKey("wms")) {
@@ -352,7 +384,7 @@ public class ASMapView extends MapView {
                 //临时禁飞区
                 boolean lsjfq = (boolean) wmsMap.get("lsjfq");
 
-                initWms(airport, jfq, xzq, wxq, gdfc, lsrwq,lsjfq);
+                initWms(airport, jfq, xzq, wxq, gdfc, lsrwq, lsjfq);
 
             }
         }
@@ -416,11 +448,29 @@ public class ASMapView extends MapView {
      *
      * @param latlng
      */
-    public void animateCamera(LatLng latlng) {
+    public void animateCamera(LatLng latlng, String v) {
 
         if (getMap() == null) return;
 
-        getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(latlng, 17.6f));
+        if (TextUtils.isEmpty(v)) {
+            v = "17.6";
+        }
+        Log.e("plugin", "v:" + v);
+        getMap().animateCamera(CameraUpdateFactory.newLatLngZoom(latlng, Float.parseFloat(v)));
+    }
+
+    /**
+     * 地图定位
+     */
+    public void animateUpdateCamera(LatLng latLng, String v) {
+        if (getMap() == null) return;
+        if (TextUtils.isEmpty(v)) {
+            v = "300";
+        }
+        LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
+        boundsBuilder.include(latLng);
+        boundsBuilder.include(getLatLng());
+        getMap().animateCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), Integer.parseInt(v)));
     }
 
     /**
@@ -444,6 +494,68 @@ public class ASMapView extends MapView {
 
             markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory
                     .decodeResource(getContext().getResources(), R.mipmap.plane_marker)));
+
+            Marker marker = getMap().addMarker(markerOptions);
+
+            markers.add(marker);
+        }
+    }
+
+
+    /**
+     * 添加marker
+     *
+     * @param latlngList
+     */
+    public void addFindDeviceMarker(List<LatLng> latlngList, Result result) {
+
+        removeMarker();
+
+        for (int i = 0; i < latlngList.size(); i++) {
+
+            LatLng latLng = latlngList.get(i);
+
+            MarkerOptions markerOptions = new MarkerOptions();
+
+            markerOptions.position(Util.getGdLatlngFormat(String.valueOf(latLng.latitude), String.valueOf(latLng.longitude), getContext()));
+
+            markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory
+                    .decodeResource(getContext().getResources(), R.mipmap.marker_dot)));
+
+            Marker marker = getMap().addMarker(markerOptions);
+
+            markers.add(marker);
+        }
+
+        result.success(null);
+    }
+
+    /**
+     * 添加marker
+     *
+     * @param latlngList
+     */
+    public void addAreaDetailMarker(List<LatLng> latlngList) {
+
+        removeMarker();
+
+        for (int i = 0; i < latlngList.size(); i++) {
+
+            LatLng latLng = latlngList.get(i);
+
+            MarkerOptions markerOptions = new MarkerOptions();
+
+            markerOptions.position(latLng);
+
+            Log.e("地图测试", Util.getFormatLatLng(latLng.latitude, latLng.longitude));
+
+            markerOptions.title(Util.getFormatLatLng(latLng.latitude, latLng.longitude));
+
+            markerOptions.anchor(0.5f, 0.5f);
+
+            markerOptions.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory
+                    .decodeResource(getContext().getResources(), R.mipmap.area_dot)));
+
 
             Marker marker = getMap().addMarker(markerOptions);
 
@@ -501,7 +613,7 @@ public class ASMapView extends MapView {
      *
      * @param latLng
      */
-    public void drawCircle(LatLng latLng, double radius) {
+    public void drawCircle(LatLng latLng, double radius, String color) {
         if (circle != null) {
             circle.remove();
             circle = null;
@@ -509,8 +621,8 @@ public class ASMapView extends MapView {
         circle = getMap().addCircle(new CircleOptions().
                 center(latLng).
                 radius(radius).
-                fillColor(Color.parseColor("#99F33019")).
-                strokeColor(Color.parseColor("#99F33019")).
+                fillColor(Color.parseColor(color)).
+                strokeColor(Color.parseColor(color)).
                 strokeWidth(1).zIndex(2));
     }
 
@@ -519,13 +631,98 @@ public class ASMapView extends MapView {
      *
      * @param latLngList
      */
-    public void drawPolylin(List<LatLng> latLngList) {
+    public void drawPolylin(List<LatLng> latLngList, String color) {
+
+        polyline = getMap().addPolyline(new PolylineOptions().
+                addAll(latLngList).width(12).color(Color.parseColor(color)));
+    }
+
+    /**
+     * 绘制飞行轨迹
+     *
+     * @param latLngList
+     */
+    public void drawFlyPolylin(List<LatLng> latLngList) {
+
+        polyline = getMap().addPolyline(new PolylineOptions().
+                addAll(latLngList).width(8).color(Color.argb(255, 1, 1, 255)));
+
+    }
+
+    /**
+     * 绘制飞行轨迹
+     */
+    public void clearFlyPolylin() {
         if (polyline != null) {
             polyline.remove();
             polyline = null;
         }
-        polyline = getMap().addPolyline(new PolylineOptions().
-                addAll(latLngList).width(12).color(Color.parseColor("#99F33019")));
+        getMap().clear();
+    }
+
+    /**
+     * 缩放
+     *
+     * @param latLngList
+     */
+    public void animateCamera(List<LatLng> latLngList) {
+        LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
+        for (int i = 0; i < latLngList.size(); i += 2) {
+            boundsBuilder.include(latLngList.get(i));
+        }
+        getMap().animateCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 300), 50, null);
+    }
+
+    /**
+     * 缩放
+     *
+     * @param latLngList
+     */
+    public void areaScaleCamera(List<LatLng> latLngList, boolean includeSelf, String areaType, double radius, double latitude, double longitude, boolean first) {
+        LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
+        for (int i = 0; i < latLngList.size(); i++) {
+            boundsBuilder.include(latLngList.get(i));
+        }
+
+        //如果包includeSelf=true并且自身坐标!=null
+        if (includeSelf && latLng != null) {
+            boundsBuilder.include(latLng);
+        }
+        Log.e("地图测试", "areaType-----" + areaType);
+        //如果空域类型是圆形的  应该把圆形的上下左右四个经纬度添加进来
+        if (areaType.equals("CIRCULAR")) {
+            Log.e("地图测试", "areaType");
+            LatLng l = new LatLng(latitude
+                    , longitude);
+            calculateLl(boundsBuilder, l, radius);
+        }
+        if (includeSelf || first) {
+            if (first) {             //如果是刚刚进来  动画缩放到相应比例
+                Log.e("地图测试", "动画缩放");
+                getMap().moveCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 300));//第二个参数为四周留空宽度
+//                new Handler().postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        getMap().animateCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 300));
+//                    }
+//                }, 1000);
+            } else {                //如果要切换到总览的状态 包含自身的点
+                boolean aleradyInArae = false;   //自己是否在当前空域里
+                if (areaType == "CIRCULAR") {  //圆形
+                    if (circle.contains(latLng)) aleradyInArae = true;     //如果自身位置已经在圆形空域里
+                }
+                if (areaType == "POLYGON") { //不规则多边形
+                    if (polygon.contains(latLng)) aleradyInArae = true;    //如果自身位置已经在不规则多边形里
+                }
+                if (aleradyInArae) //如果自己当前空域里  直接移动 四周间隔没变  相当于没有变动
+                    getMap().moveCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 300));//第二个参数为四周留空宽度
+                else   //如果自己不在当前空域   动画缩放 并且改变了四周的间隔
+                    getMap().animateCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 360));//第二个参数为四周留空宽度
+            }
+        } else {
+            //如果不是刚刚进来 或者是切换到空域状态  不用动画移动
+            getMap().moveCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 300));
+        }
     }
 
     /**
@@ -533,7 +730,7 @@ public class ASMapView extends MapView {
      *
      * @param latLngList
      */
-    public void drawPolygon(List<LatLng> latLngList) {
+    public void drawPolygon(List<LatLng> latLngList, String color) {
 
         PolygonOptions polygonOptions = new PolygonOptions();
 
@@ -547,8 +744,8 @@ public class ASMapView extends MapView {
             polygon.remove();
             polygon = null;
         }
-        polygonOptions.fillColor(Color.parseColor("#99FEB41E")).
-                strokeColor(Color.parseColor("#99FEB41E")).
+        polygonOptions.fillColor(Color.parseColor(color)).
+                strokeColor(Color.parseColor(color)).
                 strokeWidth(1).zIndex(9999);
         polygon = getMap().addPolygon(polygonOptions);
     }
@@ -581,7 +778,7 @@ public class ASMapView extends MapView {
     /**
      * 显示禁飞区图层
      */
-    public void initWms(boolean airport, boolean jfq, boolean xzq, boolean wxq, boolean gdfc, boolean lsrwq,boolean lsjfq) {
+    public void initWms(boolean airport, boolean jfq, boolean xzq, boolean wxq, boolean gdfc, boolean lsrwq, boolean lsjfq) {
         //机场净空区
         if (airport) {
 
@@ -789,4 +986,38 @@ public class ASMapView extends MapView {
         }
     }
 
+    //如果是一个圆形 添加上下左右的点
+    private void calculateLl(LatLngBounds.Builder boundsBuilder, LatLng center, double radius) {
+        Log.e("地图测试", "calculateLl----1");
+        double latitude = center.latitude;//维度
+        double longitude = center.longitude;//经度
+
+        Log.e("地图测试", "calculateLl----2");
+
+        LatLng left = new LatLng(latitude, longitude + Meters2Lon(radius));
+        LatLng right = new LatLng(latitude, longitude - Meters2Lon(radius));
+        LatLng top = new LatLng(latitude + Meters2Lat(radius), longitude);
+        LatLng bottom = new LatLng(latitude - Meters2Lat(radius), longitude);
+        boundsBuilder.include(left);
+        boundsBuilder.include(right);
+        boundsBuilder.include(top);
+        boundsBuilder.include(bottom);
+    }
+
+    /**
+     * X米转经纬度
+     */
+    private double Meters2Lon(double mx) {
+        double lon = mx * DEGREE_PER_METER;
+        return lon;
+    }
+
+    /**
+     * Y米转经纬度
+     */
+    private double Meters2Lat(double my) {
+        double lat = my * DEGREE_PER_METER;
+        lat = 180.0 / Math.PI * (2 * Math.atan(Math.exp(lat * RAD_PER_DEGREE)) - HALF_PI);
+        return lat;
+    }
 }

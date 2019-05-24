@@ -13,6 +13,9 @@ public final class ViewRegistrant {
         if (registry.hasPlugin(key)) return;
 
         PluginRegistry.Registrar registrar = registry.registrarFor(key);
+
+        BaseMapviewPlugin.registrar = registrar;
+
         registrar.platformViewRegistry().registerViewFactory("MapView", new BMapViewFactory(new StandardMessageCodec(), mapView));
     }
 }
