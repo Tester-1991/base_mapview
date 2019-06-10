@@ -5,15 +5,16 @@ import android.view.View;
 
 
 import com.amap.api.maps.MapView;
+import com.amap.api.maps.TextureMapView;
 
 import io.flutter.plugin.common.MessageCodec;
 import io.flutter.plugin.platform.PlatformView;
 import io.flutter.plugin.platform.PlatformViewFactory;
 
 public class BMapViewFactory extends PlatformViewFactory {
-    private MapView mapView;
+    private TextureMapView mapView;
 
-    public BMapViewFactory(MessageCodec<Object> createArgsCodec, MapView mapView) {
+    public BMapViewFactory(MessageCodec<Object> createArgsCodec, TextureMapView mapView) {
         super(createArgsCodec);
         this.mapView = mapView;
     }

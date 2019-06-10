@@ -54,7 +54,7 @@ import io.flutter.plugin.common.MethodChannel;
  * Created by shiyan on 2019/3/6
  * dsec:
  */
-public class ASMapView extends MapView {
+public class ASMapView extends TextureMapView {
 
     private UiSettings mUiSettings;
 

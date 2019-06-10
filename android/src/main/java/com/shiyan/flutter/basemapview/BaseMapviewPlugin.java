@@ -103,6 +103,7 @@ public class BaseMapviewPlugin implements MethodCallHandler {
         this.root.getApplication().registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
             @Override
             public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+                Log.e("plugin","onActivityCreated");
             }
 
             @Override
@@ -112,6 +113,7 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
             @Override
             public void onActivityResumed(Activity activity) {
+                Log.e("plugin","onActivityResumed");
                 if (activity != root) return;
                 if (mapView != null) {
                     mapView.onResume();
@@ -120,6 +122,7 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
             @Override
             public void onActivityPaused(Activity activity) {
+                Log.e("plugin","onActivityDestroyed");
                 if (activity != root) return;
                 if (mapView != null) {
                     mapView.onPause();
@@ -138,6 +141,7 @@ public class BaseMapviewPlugin implements MethodCallHandler {
 
             @Override
             public void onActivityDestroyed(Activity activity) {
+                Log.e("plugin","onActivityDestroyed");
                 if (activity != root) return;
                 if (mapView != null) {
                     mapView.onDestroy();

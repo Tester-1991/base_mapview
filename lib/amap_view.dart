@@ -73,18 +73,18 @@ class AMapView extends StatefulWidget {
   ///高度百分比
   final double heightPercent;
 
-  static Map<String, GlobalKey> map = {};
+  static Map<String, GlobalKey<AMapViewState>> map = {};
 
   static int counter = 0;
 
-  static GlobalKey createKey(GlobalKey orgKey) {
+  static GlobalKey<AMapViewState> createKey(GlobalKey<AMapViewState> orgKey) {
     if (counter == 0) {
       channel.setMethodCallHandler(_handleMethod);
     }
     if (orgKey != null) {
       remove(orgKey);
     }
-    GlobalKey key = new GlobalKey(debugLabel: "${++counter}");
+    GlobalKey<AMapViewState> key = new GlobalKey<AMapViewState>(debugLabel: "${++counter}");
     map[key.toString()] = key;
     return key;
   }
@@ -177,15 +177,17 @@ class AMapView extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    return _AMapViewState();
+    return AMapViewState();
   }
 }
 
 ///地图显示控件状态管理
-class _AMapViewState extends State<AMapView> {
+class AMapViewState extends State<AMapView> {
   @override
   void initState() {
     super.initState();
+
+    debugPrint("地图插件:initState");
 
     WidgetsBinding widgetsBinding = WidgetsBinding.instance;
 
@@ -194,6 +196,12 @@ class _AMapViewState extends State<AMapView> {
       AMapView.channel.invokeMethod("showMapView",
           {"mapView": widget.toMap(), "id": widget.key.toString()});
     });
+  }
+
+  void init(){
+    ///加载地图
+    AMapView.channel.invokeMethod("showMapView",
+        {"mapView": widget.toMap(), "id": widget.key.toString()});
   }
 
   @override

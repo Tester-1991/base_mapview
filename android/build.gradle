@@ -4,7 +4,7 @@ version '1.0-SNAPSHOT'
 buildscript {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
 
     dependencies {
@@ -15,7 +15,7 @@ buildscript {
 rootProject.allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
 }
 
@@ -40,10 +40,10 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     //3D地图so及jar
-    implementation 'com.amap.api:3dmap:latest.integration'
+    implementation 'com.amap.api:3dmap:6.9.0'
 
     //搜索
-    implementation 'com.amap.api:search:latest.integration'
+    implementation 'com.amap.api:search:6.9.0'
 
     //权限处理
     implementation 'com.mylhyl:acp:1.2.0'
