@@ -1,6 +1,5 @@
 package com.shiyan.flutter.basemapview;
 
-import android.util.Log;
 
 import com.amap.api.maps.model.UrlTileProvider;
 
@@ -57,17 +56,17 @@ public class HeritageScopeTileProvider extends UrlTileProvider {
         super(titleSize, titleSize);
 
         //临时任务区
-        String lsrwqUrl = "geoserver/airspace/wms?layers=airspace:airspace&FORMAT=image/png&TRANSPARENT=TRUE&SERVICE=WMS&version=1.1.0&request=GetMap&STYLES=&SRS=EPSG:3857&tiled=true&cql_filter=type='TEMPORARY' AND used = true AND '%s' <= end_time AND '%s' >= start_time&BBOX=";
+        String lsrwqUrl = "geoserver/airspace/wms?layers=airspace:airspace0&FORMAT=image/png&TRANSPARENT=TRUE&SERVICE=WMS&version=1.1.0&request=GetMap&STYLES=&SRS=EPSG:3857&tiled=true&cql_filter=type='TEMPORARY' AND used = true AND '%s' <= end_time AND '%s' >= start_time&BBOX=";
 
         String dateWithSecond = DateUtils.getyyyyMMDD();
 
         String date = DateUtils.getHHmmssDate();
 
-        String otherUrl = "geoserver/airspace/wms?layers=airspace:airspace&FORMAT=image/png&TRANSPARENT=TRUE&SERVICE=WMS&version=1.1.0&request=GetMap&STYLES=&SRS=EPSG:3857&tiled=true&cql_filter=type='%s' AND used=true&BBOX=";
+        String otherUrl = "geoserver/airspace/wms?layers=airspace:airspace0&FORMAT=image/png&TRANSPARENT=TRUE&SERVICE=WMS&version=1.1.0&request=GetMap&STYLES=&SRS=EPSG:3857&tiled=true&cql_filter=type='%s' AND used=true&BBOX=";
 
-        String dangerUrl = "geoserver/airspace/wms?layers=airspace:airspace&FORMAT=image/png&TRANSPARENT=TRUE&SERVICE=WMS&version=1.1.0&request=GetMap&STYLES=&SRS=EPSG:3857&tiled=true&cql_filter=type='DANGER_AREA' AND used=true AND ((morrow = false AND '%s' >= start_time_of_day AND '%s' <= end_time_of_day ) OR ( morrow = true AND '%s' >= start_time_of_day ) OR ( morrow = true AND '%s' <= end_time_of_day))&BBOX=";
+        String dangerUrl = "geoserver/airspace/wms?layers=airspace:airspace0&FORMAT=image/png&TRANSPARENT=TRUE&SERVICE=WMS&version=1.1.0&request=GetMap&STYLES=&SRS=EPSG:3857&tiled=true&cql_filter=type='DANGER_AREA' AND used=true AND ((morrow = false AND '%s' >= start_time_of_day AND '%s' <= end_time_of_day ) OR ( morrow = true AND '%s' >= start_time_of_day ) OR ( morrow = true AND '%s' <= end_time_of_day))&BBOX=";
 
-        String lsjfqUrl = "geoserver/airspace/wms?layers=airspace:airspace&FORMAT=image/png&TRANSPARENT=TRUE&SERVICE=WMS&version=1.1.0&request=GetMap&STYLES=&SRS=EPSG:3857&tiled=true&cql_filter=type='TEMPORARY_NO_FLY' AND used=true AND '%s' <= end_time AND '%s' >= start_time AND ((morrow = false AND '%s' >= start_time_of_day AND '%s' <= end_time_of_day ) OR ( morrow = true AND '%s' >= start_time_of_day ) OR ( morrow = true AND '%s' <= end_time_of_day))&BBOX=";
+        String lsjfqUrl = "geoserver/airspace/wms?layers=airspace:airspace0&FORMAT=image/png&TRANSPARENT=TRUE&SERVICE=WMS&version=1.1.0&request=GetMap&STYLES=&SRS=EPSG:3857&tiled=true&cql_filter=type='TEMPORARY_NO_FLY' AND used=true AND '%s' <= end_time AND '%s' >= start_time AND ((morrow = false AND '%s' >= start_time_of_day AND '%s' <= end_time_of_day ) OR ( morrow = true AND '%s' >= start_time_of_day ) OR ( morrow = true AND '%s' <= end_time_of_day))&BBOX=";
 
         //地址写你自己的wms地址
         if (i == 0)      //机场
